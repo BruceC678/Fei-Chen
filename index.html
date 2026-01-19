@@ -1,0 +1,1609 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fei Chen - Digital Architect</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Babel for JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Import Maps to resolve module imports -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.2.0",
+            "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+            "react-dom": "https://esm.sh/react-dom@18.2.0",
+            "framer-motion": "https://esm.sh/framer-motion@10.16.4?external=react,react-dom",
+            "lucide-react": "https://esm.sh/lucide-react@0.292.0?external=react,react-dom"
+        }
+    }
+    </script>
+
+    <style>
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #050505; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #333; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555; 
+        }
+        
+        /* Hide cursor on non-touch devices to use custom cursor */
+        @media (pointer: fine) {
+            body {
+                cursor: none;
+            }
+            a, button, .interactive {
+                cursor: none !important;
+            }
+            .cursor-auto {
+                cursor: auto !important;
+            }
+            .cursor-auto button {
+                cursor: pointer !important;
+            }
+        }
+        
+        /* Utility for outline text */
+        .text-outline {
+            -webkit-text-stroke: 1px rgba(255, 255, 255, 0.3);
+            color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-[#050505] text-white overflow-x-hidden selection:bg-white selection:text-black">
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, useRef, useMemo } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { createPortal } from 'react-dom';
+        import { motion, useScroll, useTransform, useSpring, useMotionValue, AnimatePresence } from 'framer-motion';
+        import { ArrowRight, ArrowUpRight, ArrowLeft, X, Send, MessageSquare, Sparkles, Image as ImageIcon, CheckCircle2, BarChart3, TrendingUp, Clock, AlertCircle, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
+
+        /* --- 1. DATA DEFINITIONS --- */
+        
+        const translations = {
+          en: {
+            nav: { work: "Work", about: "About", contact: "Contact", talk: "Let's Talk", back: "Back Home" },
+            hero: {
+              title_line1: "DIGITAL",
+              title_line2: "ARCHITECT",
+              desc: "Designing how people move, decide, and act within systems.",
+              scroll: "Scroll to Explore"
+            },
+            sections: {
+              selected: "Selected Works",
+              about_me: "About Me",
+              trajectory: "Experience",
+              education: "Education", 
+              concept: "The Concept",
+            },
+            about_text: "Space is not just a container for life, but an active participant. Transitioning from Interior Design to UX/UI, I construct 'digital architectures'—structures that are as functional as they are beautiful.",
+            footer: {
+              rights: "Fei Chen."
+            },
+            ai: {
+              greeting: "Hello. I am Fei's digital twin. Ask me anything.",
+              placeholder: "Type a question...",
+              wait: "Powered by Gemini 2.5"
+            },
+            groups: {
+                digital: "Digital Systems",
+                spatial: "Spatial Systems",
+                visual: "Visual Exploration"
+            }
+          },
+          zh: {
+            nav: { work: "作品", about: "关于", contact: "联系", talk: "开始对话", back: "返回" },
+            hero: {
+              title_line1: "数字",
+              title_line2: "建筑师",
+              desc: "设计人们如何在系统中移动、决策与行动。",
+              scroll: "滑动探索"
+            },
+            sections: {
+              selected: "精选作品",
+              about_me: "关于我",
+              trajectory: "工作经历",
+              education: "教育背景", 
+              concept: "设计理念",
+            },
+            about_text: "空间不仅仅是生活的容器，更是体验的参与者。从室内设计到 UX/UI，我致力于构建“数字建筑”——既具功能性又具美感的结构。",
+            footer: {
+              rights: "Fei Chen."
+            },
+            ai: {
+              greeting: "你好。我是 Fei 的数字分身。请随意提问。",
+              placeholder: "输入问题...",
+              wait: "由 Gemini 2.5 驱动"
+            },
+            groups: {
+                digital: "数字系统",
+                spatial: "空间系统",
+                visual: "视觉探索"
+            }
+          }
+        };
+
+        const experienceData = [
+          {
+            role: { en: "UX/UI Product Designer", zh: "UX/UI 产品设计师" },
+            company: { en: "Wyze Labs, Inc.", zh: "Wyze Labs, Inc." },
+            period: "Sep 2022 - Present"
+          },
+          {
+            role: { en: "UX/UI Designer", zh: "UX/UI 设计师" },
+            company: { en: "UX/UI Freelancer", zh: "自由职业" },
+            period: "Apr 2018 - Sep 2022"
+          },
+          {
+            role: { en: "Interior Design Intern", zh: "室内设计实习生" },
+            company: { en: "R.D. Jones & Associates", zh: "R.D. Jones & Associates" },
+            period: "Mar 2022 - Jun 2022"
+          },
+          {
+            role: { en: "Design Consultant", zh: "设计顾问" },
+            company: { en: "BuildSimHub Inc.", zh: "BuildSimHub Inc." },
+            period: "Oct 2018 - Apr 2019"
+          }
+        ];
+
+        const educationData = [
+          {
+            school: { en: "Savannah College of Art and Design (SCAD)", zh: "萨凡纳艺术与设计学院 (SCAD)" },
+            degree: { en: "Interior Design, Master of Arts", zh: "室内设计硕士" },
+            period: "Sep 2015 - Jun 2018",
+            gpa: "GPA: 4.0/4.0"
+          },
+          {
+            school: { en: "Hubei University of Technology", zh: "湖北工业大学" },
+            degree: { en: "Exhibition Design, Bachelor of Arts", zh: "会展设计学士" },
+            period: "Sep 2007 - Jun 2011",
+            gpa: "GPA: 3.4/4.0"
+          }
+        ];
+
+        const projectGroups = [
+          {
+            key: 'digital',
+            projects: [
+               {
+                id: 0, 
+                title: { en: "Service Plan Redesign", zh: "服务订阅体系重构" },
+                subtitle: { en: "Unifying a Fragmented Multi-Platform Subscription System", zh: "统一碎片化的多平台订阅系统" },
+                category: { en: "Product Architecture", zh: "产品架构" },
+                year: "2023",
+                role: { en: "Sole Product Designer", zh: "独立产品设计师" },
+                platforms: { en: "iOS · Android", zh: "iOS · Android" },
+                duration: { en: "~4 Months", zh: "~4 个月" },
+                heroImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?q=80&w=2426&auto=format&fit=crop", 
+                focus: { 
+                    en: ["· Subscription Architecture", "· Entitlements", "· Cross-platform UX", "· Legacy Constraints"],
+                    zh: ["· 订阅架构", "· 权益管理", "· 跨平台体验", "· 遗留系统约束"]
+                },
+                description: { 
+                    en: "Unifying a fragmented multi-platform subscription system across Apple, Google, Amazon, and Web for a large-scale camera security platform.", 
+                    zh: "为大型安防监控平台统一 Apple、Google、Amazon 和 Web 端的碎片化订阅系统，重构用户权益架构。" 
+                },
+                color: "from-indigo-900/40",
+                details: [
+                    {
+                        title: { en: "Scope & Scale", zh: "范围与规模" },
+                        content: { 
+                            en: "I led the redesign of a legacy subscription system spanning Apple, Google, Amazon, and Web, used across a large-scale camera security platform.\n\nThe system sat at the intersection of:\n• Subscription monetization\n• Entitlement management\n• Legacy service coexistence\n• Cross-platform billing constraints\n\nIt was production-critical and directly impacted revenue, churn, and support cost.",
+                            zh: "我主导了跨越 Apple、Google、Amazon 和 Web 的遗留订阅系统的重构，服务于一个大规模的摄像头安防平台。\n\n该系统处于以下领域的交汇点：\n• 订阅变现\n• 权益管理\n• 旧服务共存\n• 跨平台计费约束\n\n它是生产关键型的，直接影响收入、流失率和支持成本。"
+                        },
+                        imageSlot: { en: "HERO: New Services Page (aggregated plans)", zh: "核心展示：新服务页面（聚合套餐）" }
+                    },
+                    {
+                        title: { en: "Signal & Validation", zh: "信号与验证" },
+                        content: {
+                            en: "Before the redesign, multiple signals indicated the subscription system had become unsustainable:\n• Support tickets frequently referenced confusion around plan ownership and device coverage\n• Users unintentionally purchased duplicate subscriptions across platforms\n• Internal teams repeatedly escalated entitlement conflicts during upgrades and cancellations\n\nThese signals made it clear that the issue was not visual inconsistency—but systemic fragmentation that impacted both users and internal operations.",
+                            zh: "在重构之前，多个信号表明订阅系统已变得不可持续：\n• 支持工单经常提到关于计划所有权和设备覆盖范围的混淆\n• 用户无意中在不同平台上购买了重复的订阅\n• 内部团队在升级和取消过程中反复升级权益冲突\n\n这些信号表明，问题不在于视觉上的不一致，而在于影响用户和内部运营的系统性碎片化。"
+                        },
+                        chartData: {
+                            type: 'bar',
+                            title: { en: "User Support Volume Breakdown", zh: "用户工单类型分布" },
+                            data: [
+                                { label: "Duplicate Billing", value: 35, percent: "35%", color: "bg-red-500" },
+                                { label: "Coverage Confusion", value: 42, percent: "42%", color: "bg-red-500" },
+                                { label: "Upgrade Errors", value: 15, percent: "15%", color: "bg-orange-500" },
+                                { label: "Other", value: 8, percent: "8%", color: "bg-gray-500" }
+                            ]
+                        }
+                    },
+                    {
+                        title: { en: "Problem Reality", zh: "现实困境" },
+                        content: { 
+                            en: "Over time, different teams independently introduced new plans and rules. Users faced an inconsistent experience:\n• Per-camera subscriptions instead of account-level plans\n• Duplicate subscriptions across platforms\n• Overlapping services\n\nWhat users experienced as 'confusing UX' was rooted in deeper structural fragmentation.",
+                            zh: "随着时间推移，不同团队独立引入了新计划和规则。用户面临着不一致的体验：\n• 基于摄像头的订阅而非账户级计划\n• 跨平台重复订阅\n• 服务重叠\n\n用户体验到的“混乱 UX”根源在于更深层的结构碎片化。"
+                        },
+                        imageSlot: { en: "CONTEXT: Legacy Services page showing fragmentation", zh: "现状：显示碎片化的旧服务页面" }
+                    },
+                    {
+                        title: { en: "Complexity Proof", zh: "复杂性验证" },
+                        content: { 
+                            en: "This problem could not be solved by redesigning a single screen. Key constraints included:\n• Legacy plans that could not be removed\n• Platform-specific billing rules\n• Conflicting requirements across PM, billing, and cloud teams\n\nThe system needed to continue operating during the transition, making backward compatibility non-negotiable.",
+                            zh: "这个问题无法通过重新设计单个屏幕来解决。关键约束包括：\n• 无法移除的遗留计划\n• 平台特定的计费规则\n• 跨 PM、计费和云团队的冲突需求\n\n系统需要在过渡期间继续运行，因此向后兼容性是不可妥协的。"
+                        },
+                        imageSlot: { en: "PROOF: Platform restriction flows", zh: "证据：平台限制流程截图" }
+                    },
+                    {
+                        title: { en: "Design Approach", zh: "设计方法" },
+                        content: { 
+                            en: "Before designing UI, I focused on stabilizing the system logic. I worked closely with engineering teams to map existing entitlements, define coexistence rules, and establish predictable upgrade guarantees. This architectural clarity became the foundation for all subsequent design decisions.",
+                            zh: "在设计 UI 之前，我专注于稳定系统逻辑。我与工程团队紧密合作，映射现有权益，定义共存规则，并建立可预测的升级保证。这种架构上的清晰度成为了所有后续设计决策的基础。"
+                        },
+                        imageSlot: { en: "DIAGRAM: System mapping (platform → entitlement)", zh: "图表：系统映射（平台 → 权益）" }
+                    },
+                    {
+                        title: { en: "System Restructure", zh: "系统重构" },
+                        content: { 
+                            en: "We transitioned from a fragmented, license-driven model to a clear tier-based system:\n• T1 (Per-camera)\n• T2 (Unlimited)\n• T3 (AI protection)\n\nLegacy plans were preserved under the hood but abstracted away. The system now expressed a single, consistent mental model regardless of platform source.",
+                            zh: "我们从碎片化的许可证驱动模型转变为清晰的分层系统：\n• T1（单摄）\n• T2（无限）\n• T3（AI 保护）\n\n遗留计划在底层得以保留但对用户抽象化。无论平台来源如何，系统现在都表达了一个单一、一致的心智模型。"
+                        },
+                        imageSlot: { en: "MODEL: Tier mapping visual (T1/T2/T3)", zh: "模型：分层映射视觉图 (T1/T2/T3)" }
+                    },
+                    {
+                        title: { en: "Solution Evidence", zh: "解决方案" },
+                        content: { 
+                            en: "With the new model, the UI reflected clarity. Key changes included:\n• Aggregated service cards\n• Clear plan ownership\n• Simplified management without exposing mechanics\n• Predictable upgrade paths\n\nUsers no longer needed to reason about entitlements.",
+                            zh: "有了新模型，UI 终于反映出了清晰度。关键变化包括：\n• 聚合服务卡片\n• 清晰的计划所有权\n• 不暴露机制的简化管理\n• 可预测的升级路径\n\n用户不再需要推理解读权益逻辑。"
+                        },
+                        imageSlot: { en: "AFTER: New Manage Subscription UI", zh: "成果：新的订阅管理界面" }
+                    },
+                    {
+                        title: { en: "Impact", zh: "影响力" },
+                        content: { 
+                            en: "Reduced confusion around ownership, fewer duplicate subscriptions, clearer upgrade paths, and lower support volume related to entitlement issues. The system became more operable for both users and internal teams.",
+                            zh: "减少了关于所有权的困惑，减少了重复订阅，升级路径更清晰，权益相关问题的支持量降低。系统对于用户和内部团队都变得更具可操作性。"
+                        },
+                        impactGrid: [
+                            {
+                                type: 'trend',
+                                title: { en: "Support Volume", zh: "支持工单量" },
+                                value: "-45%",
+                                trend: "down",
+                                labels: { start: "Pre-Launch", end: "Post-Launch" },
+                                icon: AlertCircle
+                            },
+                            {
+                                type: 'bar',
+                                title: { en: "Duplicate Subs", zh: "重复订阅数" },
+                                icon: CheckCircle2,
+                                data: [
+                                    { label: "Before", value: "High", percent: "80%", color: "bg-red-500/50" },
+                                    { label: "After", value: "Low", percent: "20%", color: "bg-green-500" }
+                                ]
+                            },
+                            {
+                                type: 'trend',
+                                title: { en: "Upgrade Conv.", zh: "升级转化率" },
+                                value: "+25%",
+                                trend: "up",
+                                labels: { start: "Q1", end: "Q4" },
+                                icon: TrendingUp
+                            },
+                            {
+                                type: 'bar',
+                                title: { en: "Debug Time/Wk", zh: "周调试时间" },
+                                icon: Clock,
+                                data: [
+                                    { label: "Legacy", value: "20h", percent: "90%", color: "bg-gray-500" },
+                                    { label: "New", value: "2h", percent: "15%", color: "bg-blue-500" }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        title: { en: "Design Judgment", zh: "设计判断" },
+                        content: { 
+                            en: "The most critical decisions weren’t visual. They were about which system complexity must remain invisible, which constraints must be surfaced, and how much control users actually need. Balancing these trade-offs is where product design becomes system design.",
+                            zh: "最关键的决策不是视觉上的。而是关于哪些系统复杂性必须保持不可见，哪些约束必须浮出水面，以及用户实际上需要多少控制权。平衡这些权衡是产品设计转化为系统设计的地方。"
+                        }
+                    },
+                    {
+                        title: { en: "Designer Positioning", zh: "设计师定位" },
+                        content: { 
+                            en: "I specialize in designing subscription systems, cross-platform experiences, and workflows constrained by real production requirements. My strength is turning fragmented, high-risk systems into clear, scalable product experiences.",
+                            zh: "我专注于设计订阅系统、跨平台体验以及受实际生产要求约束的工作流。我的强项是将碎片化、高风险的系统转化为清晰、可扩展的产品体验。"
+                        }
+                    }
+                ]
+               },
+               {
+                id: 10, 
+                title: { en: "IAP Flow Optimization", zh: "IAP 流程优化" },
+                subtitle: { en: "Designing a State-Aware Monetization System Across Product Entry Points", zh: "设计跨产品入口的状态感知变现系统" },
+                category: { en: "Monetization UX", zh: "变现体验" },
+                year: "2023",
+                role: { en: "Sole Product Designer", zh: "独立产品设计师" },
+                platforms: { en: "iOS · Android", zh: "iOS · Android" },
+                duration: { en: "~3 Months", zh: "~3 个月" },
+                focus: {
+                    en: ["· IAP Architecture", "· State-driven Workflows", "· Subscription Logic", "· Monetization UX"],
+                    zh: ["· IAP 架构", "· 状态驱动工作流", "· 订阅逻辑", "· 变现体验"]
+                },
+                description: {
+                    en: "Transforming In-App Purchase from Static Paywalls into a State-Aware System.",
+                    zh: "将应用内购买从静态付费墙转变为状态感知系统。"
+                },
+                color: "from-blue-900/40",
+                details: [
+                    {
+                        title: { en: "Scope & Scale", zh: "范围与规模" },
+                        content: {
+                            en: "I led the redesign of the in-app purchase (IAP) system for a camera security app used across multiple product surfaces. Unlike a single conversion flow, IAP appeared in high-frequency and high-impact moments, including:\n• Service browsing\n• Camera onboarding\n• Camera feature management\n• Event review\n\nThe system needed to support multiple subscription tiers, different ownership states, and real-time decision-making. IAP was no longer just a revenue surface—it had become a core system dependency.",
+                            zh: "我主导了一款多端使用的安防摄像头 App 的应用内购买（IAP）系统重构。不同于单一的转化流程，IAP 出现在高频且高影响力的时刻，包括：\n• 服务浏览\n• 摄像头引导设置\n• 功能管理\n• 事件回看\n\n系统需要支持多种订阅层级、不同的所有权状态以及基于用户上下文的实时决策。IAP 不再仅仅是收入界面，而是成为了核心系统依赖。"
+                        },
+                        imageSlot: { en: "HERO: New IAP paywall + follow-up flow", zh: "核心展示：新 IAP 付费墙 + 后续流程" }
+                    },
+                    {
+                        title: { en: "Understanding Purchase Intent", zh: "理解购买意图" },
+                        content: {
+                            en: "Early analysis revealed that users entered IAP flows with very different intent levels:\n• Generic purchase entry points reflected exploratory or undecided intent\n• Camera onboarding carried high urgency and time sensitivity\n• Camera- and event-level entry points were driven by immediate value realization\n\nTreating these contexts as a single flow led to mismatched messaging and unnecessary friction—prompting a shift toward a state-aware IAP system.",
+                            zh: "早期分析显示，用户进入 IAP 流程时的意图水平截然不同：\n• 通用购买入口反映了探索性或未决定的意图\n• 摄像头引导具有高度的紧迫性和时间敏感性\n• 摄像头和事件级入口是由即时价值实现驱动的\n\n将这些情境视为单一流程导致了信息不匹配和不必要的摩擦——这促使我们转向状态感知的 IAP 系统。"
+                        }
+                    },
+                    {
+                        title: { en: "Problem Reality", zh: "现实困境" },
+                        content: {
+                            en: "The original IAP experience treated purchase as a single, isolated moment. In practice, users entered IAP with very different intents:\n• Exploring plans\n• Finishing setup\n• Unlocking a feature\n\nHowever, the system responded with the same behavior every time. This resulted in unnecessary plan comparisons during onboarding, redundant prompts for subscribers, and confusion between 'adding a feature' vs 'buying a plan'. What looked like a conversion problem was rooted in a workflow mismatch.",
+                            zh: "原有的 IAP 体验将购买视为一个单一、孤立的时刻。实际上，用户带着截然不同的意图进入 IAP：\n• 探索计划\n• 完成设置\n• 解锁特定功能\n\n然而，系统每次都以相同的行为响应。这导致了引导过程中不必要的计划比较、对现有订阅者的冗余提示，以及“增加功能”与“购买计划”之间的混淆。表面上的转化率问题，根源在于工作流与用户意图的不匹配。"
+                        },
+                        imageSlot: { en: "CONTEXT: IAP entry points across Home/Camera/Event", zh: "现状：首页/摄像头/事件等不同场景下的 IAP 入口" }
+                    },
+                    {
+                        title: { en: "Complexity Proof", zh: "复杂性验证" },
+                        content: {
+                            en: "This was not a UI-level problem. Key constraints included:\n• Different entry points with different user intent\n• Camera-level vs account-level subscription logic\n• License availability and attachment rules\n• The need to support future tiers without rebuilding flows\n\nA single static paywall could not scale across these scenarios without breaking user trust.",
+                            zh: "这不是一个 UI层面的问题。关键约束包括：\n• 具有不同用户意图的多个入口\n• 摄像头级与账户级订阅逻辑的区别\n• 许可证可用性与绑定规则\n• 在不重建流程的情况下支持未来层级的需求\n\n单一的静态付费墙无法在不破坏用户信任的情况下扩展到这些场景。"
+                        },
+                        imageSlot: { en: "PROOF: Old flow reused in onboarding vs management", zh: "证据：在引导与管理场景中复用的旧流程对比" }
+                    },
+                    {
+                        title: { en: "Design Approach", zh: "设计方法" },
+                        content: {
+                            en: "Before redesigning screens, I focused on system behavior.\n\nEarly usability testing and validation experiments revealed that user intent varied significantly depending on where IAP was encountered. Treating all entry points as a single flow was masking these differences and creating unnecessary friction.\n\nWorking closely with PM and engineering, and informed by observed user behavior across multiple IAP contexts, I reframed the problem around a single question: What does the system already know about this user at the moment they encounter IAP?\n\nThis led to a key architectural distinction:\n• Camera-unbound entry points (no specific camera is associated at the moment of purchase)\n• Camera-bound entry points (the system knows exactly which camera is involved)\n\nThis distinction became the foundation for a state-aware IAP system.",
+                            zh: "在重新设计屏幕之前，我专注于系统行为。\n\n早期的可用性测试和验证实验表明，用户意图因遇到 IAP 的位置而异。将所有入口点视为单一流程掩盖了这些差异，并造成了不必要的摩擦。\n\n通过与产品经理和工程团队紧密合作，并基于在多个 IAP 场景中观察到的用户行为，我围绕一个问题重新构建了这个问题：当用户遇到 IAP 时，系统已经知道了关于该用户的什么信息？\n\n这引出了一个关键的架构区分：\n• 与特定设备无关的入口点（购买时刻未关联特定摄像机）\n• 特定于摄像头的入口点（系统确切知道涉及哪台摄像机）\n\n这一区分成为了状态感知 IAP 系统的基础。"
+                        },
+                        imageSlot: { en: "DIAGRAM: Simplified decision model", zh: "图表：简化决策模型（入口情境 → 用户状态 → 系统响应）" }
+                    },
+                    {
+                        title: { en: "System Restructure", zh: "系统重构" },
+                        content: {
+                            en: "For Camera-unbound Entry Points (Home, Account), the redesigned flow keeps the paywall consistent but adapts the workflow based on camera count. For Camera-bound Entry Points (Onboarding, Settings), the system focuses on task completion. Behavior adapts based on user state:\n• Free users get value framing\n• Licensed users get immediate attachment\n• Unlicensed users get minimal purchase flow",
+                            zh: "对于非特定摄像头的入口（首页、账户），重设计的流程保持付费墙一致，但根据摄像头数量调整工作流。对于特定摄像头的入口（引导、设置），系统专注于任务完成。行为根据用户状态调整：\n• 免费用户看到价值引导\n• 有许可证用户直接绑定\n• 无许可证用户进入极简购买流程"
+                        },
+                        imageSlot: { en: "MODEL: New Generic Purchase Flow", zh: "模型：新通用购买流程（付费墙 → 分支逻辑）" }
+                    },
+                    {
+                        title: { en: "Camera-Bound Adaptation", zh: "特定摄像头的适配" }, 
+                        content: {
+                            en: "In contexts like Camera Onboarding or Event Detail, the system already knows which camera the user is acting on. Instead of plan comparison, the system focuses on task completion.\n• Free users see clear value framing tied to the task.\n• Subscribed users with licenses get immediate attachment.\n• Subscribed users without licenses see a minimal, transparent purchase flow.",
+                            zh: "在摄像头引导或事件详情等场景中，系统已经知道用户正在操作哪台摄像头。系统专注于任务完成，而非计划比较。\n• 免费用户看到与任务相关的清晰价值引导。\n• 有许可证的订阅用户获得即时绑定。\n• 无许可证的订阅用户看到极简透明的购买流程。"
+                        },
+                        // UPDATED: imageGrid with 3 images, layout handled by component to stack
+                        imageGrid: [
+                             { en: "State 1: Free User - Value Prop", zh: "状态1：免费用户 - 价值主张" },
+                             { en: "State 2: Licensed User - Auto Attach", zh: "状态2：已订阅用户 - 自动绑定" },
+                             { en: "State 3: Unlicensed User - Purchase Flow", zh: "状态3：无许可证用户 - 购买流程" }
+                        ]
+                    },
+                    {
+                        title: { en: "Solution Evidence", zh: "解决方案" },
+                        content: {
+                            en: "With the new system model in place, IAP behavior became predictable and consistent across the product. Key improvements included:\n• A single paywall reused across contexts\n• Workflow-level adaptation instead of duplicated UI\n• Clear separation between 'unlocking a feature' and 'buying a plan'\n• Monetization that no longer blocked core user tasks",
+                            zh: "随着新系统模型的落地，IAP 行为在整个产品中变得可预测且一致。关键改进包括：\n• 跨场景复用单一付费墙\n• 工作流层面的适配而非重复 UI\n• 清晰区分“解锁功能”与“购买计划”\n• 不再阻碍核心任务的变现流程"
+                        },
+                        // REMOVED imageSlot in section 08
+                    },
+                    {
+                        title: { en: "Impact", zh: "影响力" },
+                        content: {
+                            en: "After rollout, we observed strong directional outcomes:\n• Fewer unnecessary purchase interruptions\n• Clearer upgrade and attachment paths\n• Improved user confidence during onboarding\n• Reduced internal debugging of subscription states\n\nIAP evolved from a brittle UI pattern into a reliable product system.",
+                            zh: "上线后，我们观察到了强劲的正向结果：\n• 不必要的购买打断减少\n• 升级和绑定路径更清晰\n• 引导期间用户信心提升\n• 内部调试订阅状态的时间减少\n\nIAP 从脆弱的 UI 模式进化为可靠的产品系统。"
+                        },
+                        impactGrid: [
+                            {
+                                type: 'trend',
+                                title: { en: "Drop-off Rate", zh: "流失率" },
+                                value: "-35%",
+                                trend: "down",
+                                labels: { start: "Legacy", end: "New Flow" },
+                                icon: AlertCircle
+                            },
+                            {
+                                type: 'bar',
+                                title: { en: "Setup Completion", zh: "设置完成率" },
+                                icon: CheckCircle2,
+                                data: [
+                                    { label: "Old", value: "65%", percent: "65%", color: "bg-gray-500" },
+                                    { label: "New", value: "92%", percent: "92%", color: "bg-green-500" }
+                                ]
+                            },
+                            {
+                                type: 'trend',
+                                title: { en: "Revenue / User", zh: "单用户收入" },
+                                value: "+15%",
+                                trend: "up",
+                                labels: { start: "Q2", end: "Q4" },
+                                icon: TrendingUp
+                            },
+                            {
+                                type: 'bar',
+                                title: { en: "Support Tickets", zh: "客服工单" },
+                                icon: MessageSquare,
+                                data: [
+                                    { label: "Before", value: "High", percent: "80%", color: "bg-red-500/50" },
+                                    { label: "After", value: "Low", percent: "15%", color: "bg-blue-500" }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        title: { en: "Design Judgment", zh: "设计判断" },
+                        content: {
+                            en: "The most important decisions in this project were not visual. They were about:\n• When to ask users to decide\n• When the system should decide for them\n• How much complexity users actually need to see\n\nManaging those trade-offs is where monetization design becomes system design.",
+                            zh: "该项目最重要的决策不是视觉上的。而是关于：\n• 何时让用户做决定\n• 何时系统应代为决定\n• 用户实际上需要看到多少复杂性\n\n管理这些权衡是变现设计转化为系统设计的地方。"
+                        }
+                    },
+                    {
+                        title: { en: "Designer Positioning", zh: "设计师定位" },
+                        content: {
+                            en: "This project reflects my strength in designing state-aware monetization systems, workflows that adapt to user intent, and scalable subscription architectures. Together with Case 1, this case demonstrates my ability to design complex, production-critical systems that remain clear as products grow.",
+                            zh: "该项目反映了我在设计状态感知变现系统、适应用户意图的工作流以及可扩展订阅架构方面的优势。与案例 1 结合，该案例展示了我设计复杂、关键生产系统的能力，确保系统随产品增长保持清晰。"
+                        }
+                    }
+                ]
+               },
+               // NEW PROJECT: AI Video Search
+               {
+                id: 11, // New ID
+                title: { en: "AI Video Search", zh: "AI 视频搜索" },
+                subtitle: { en: "Accelerating Event Discovery in High-Volume Camera Systems", zh: "加速海量摄像机系统中的事件发现" },
+                category: { en: "AI Feature", zh: "AI 功能" },
+                year: "2024", 
+                role: { en: "Sole Product Designer", zh: "独立产品设计师" },
+                platforms: { en: "iOS · Android", zh: "iOS · Android" },
+                duration: { en: "~2 Months", zh: "~2 个月" },
+                focus: {
+                    en: ["· AI-assisted Discovery", "· Workflow Acceleration", "· Cognitive Load Reduction"],
+                    zh: ["· AI 辅助发现", "· 工作流加速", "· 认知负荷降低"]
+                },
+                description: {
+                    en: "Accelerating event discovery in high-volume camera systems to reduce time and effort while preserving user trust.",
+                    zh: "加速海量摄像机系统中的事件发现，在保持用户信任的同时减少时间和精力消耗。"
+                },
+                color: "from-purple-900/40", 
+                details: [
+                    // NEW INSERTED SECTION AT THE TOP
+                    {
+                        title: { en: "Discovery Friction Signals", zh: "发现摩擦信号" },
+                        content: {
+                            en: "Observing existing behavior revealed consistent friction during video discovery:\n• Users scrolled extensively through long event lists\n• Filters were repeatedly adjusted without guaranteeing success\n• Users frequently jumped between Event lists and camera-level views\n\nThe problem was not the absence of tools—but the growing cost of locating a specific moment as video volume increased.",
+                            zh: "观察现有行为揭示了视频发现过程中的持续摩擦：\n• 用户在长长的事件列表中大量滚动\n• 反复调整筛选器却无法保证成功\n• 用户频繁在事件列表和摄像头级视图之间跳转\n\n问题不在于缺乏工具，而在于随着视频量的增加，定位特定时刻的成本不断增加。"
+                        },
+                        // REMOVED imageGrid for this section
+                    },
+                    {
+                        title: { en: "Scope & Context", zh: "范围与背景" },
+                        content: {
+                            en: "As camera adoption scales, users generate an increasing volume of recorded events across multiple devices. This project focused on how users locate a specific moment—not how events are captured. The goal of Video Search was to reduce the time and effort required to find meaningful events, while preserving existing workflows users already trust.",
+                            zh: "随着摄像机普及率的提高，用户在多个设备上生成的录制事件量不断增加。本项目关注用户如何定位特定时刻——而非事件如何被捕捉。视频搜索的目标是减少寻找有意义事件所需的时间和精力，同时保留用户已信任的现有工作流。"
+                        },
+                        imageSlot: { en: "HERO: Video Search results page", zh: "核心展示：视频搜索结果页" }
+                    },
+                    {
+                        title: { en: "Problem Reality", zh: "现实困境" },
+                        content: {
+                            en: "Before Video Search, users relied on manual exploration:\n• Browsing long Event lists\n• Applying filters\n• Context switching between tabs\n\nWhile functional, this workflow became increasingly painful at scale. The most common user pain points were slow discovery, too many steps, and repeated context switching. What users described as 'hard to find videos' was fundamentally a time and attention problem.",
+                            zh: "在视频搜索之前，用户依赖手动探索：\n• 浏览长长的事件列表\n• 应用筛选器\n• 在标签页之间切换上下文\n\n虽然功能可用，但随着规模扩大，这种工作流变得越来越痛苦。用户最常见的痛点是发现缓慢、步骤过多以及重复的上下文切换。用户所描述的“很难找到视频”本质上是一个时间和注意力问题。"
+                        },
+                         // REMOVED imageSlot for this section
+                    },
+                    {
+                        title: { en: "Complexity Beneath the Surface", zh: "表面之下的复杂性" },
+                        content: {
+                            en: "This was not a simple search UI problem. Key constraints included:\n• Large, unstructured video datasets\n• Existing discovery workflows that could not be removed\n• Varying relevance in AI results\n• The need to preserve user trust\n\nVideo Search needed to accelerate discovery without breaking task continuity.",
+                            zh: "这不是一个简单的搜索 UI 问题。关键约束包括：\n• 庞大的非结构化视频数据集\n• 无法移除的现有发现工作流\n• AI 结果的相关性差异\n• 保持用户信任的需求\n\n视频搜索需要在不破坏任务连续性的前提下加速发现。"
+                        },
+                        imageSlot: { en: "COMPLEXITY: Manual vs Search comparison", zh: "复杂性：手动筛选与搜索入口对比" }
+                    },
+                    {
+                        title: { en: "Design Judgment", zh: "设计判断" },
+                        content: {
+                            en: "The core design decision was not about making AI more powerful. It was deciding:\n• When AI should assist\n• When users should remain in control\n• How to reduce steps without hiding system behavior\n\nInstead of replacing existing workflows, Video Search was positioned as a parallel accelerator—a faster path that users could enter and exit naturally.",
+                            zh: "核心设计决策不在于让 AI 更强大。而是决定：\n• AI 何时协助\n• 用户何时保持控制\n• 如何在隐藏系统行为的情况下减少步骤\n\n视频搜索定位为并行加速器，而非替代现有工作流——这是一条用户可以自然进出的更快路径。"
+                        }
+                    },
+                    {
+                        title: { en: "Solution — Video Search Experience", zh: "解决方案 — 视频搜索体验" },
+                        content: {
+                            en: "Key behaviors:\n• One-tap entry via the Video Search icon\n• Natural language input (e.g., 'dog in backyard')\n• Results returned within familiar event structures\n• Relevance-based ordering without removing filters\n\nThe experience emphasizes speed without mystery—users always understand what they are seeing and why.",
+                            zh: "关键行为：\n• 通过视频搜索图标一键进入\n• 自然语言输入（例如“后院的狗”）\n• 在熟悉的事件结构中返回结果\n• 基于相关性排序而不移除筛选器\n\n这种体验强调速度而非神秘感——用户始终明白他们看到了什么以及原因。"
+                        },
+                        imageSlot: { en: "SOLUTION: Search entry & Results", zh: "方案：搜索入口与结果展示" }
+                    },
+                    {
+                        title: { en: "Search Recovery & Task Continuity", zh: "搜索恢复与任务连续性" },
+                        content: {
+                            en: "Video Search accelerates precision—but it does not trap users. When users don’t immediately find the event they want:\n• They remain within the event browsing context\n• Existing filters (camera, person, pet) stay accessible\n• Continue manual exploration without restarting the task\n\nThis ensures Video Search never becomes a dead end. Instead of forcing users to trust AI results blindly, the system keeps manual control always within reach.",
+                            zh: "视频搜索加速了精确度——但它不会困住用户。当用户没有立即找到想要的事件时：\n• 他们仍然处于事件浏览上下文中\n• 现有筛选器（摄像头、人员、宠物）保持可用\n• 继续手动探索而无需重启任务\n\n这确保了视频搜索永远不会成为死胡同。系统不强迫用户盲目信任 AI 结果，而是始终将手动控制权保留在触手可及之处。"
+                        },
+                        imageSlot: { en: "RECOVERY: Transition to Events list", zh: "恢复：过渡回事件列表" }
+                    },
+                    {
+                        title: { en: "Future Scope — Iteration Roadmap", zh: "未来范围 — 迭代路线图" },
+                        content: {
+                            en: "During the design exploration, a key opportunity emerged to reduce interaction costs within Video Search further.\n\nThe proposed iteration included:\n• Auto-play of the top visible event in the results list\n• Reduced navigation into Event Detail pages, eliminating extra taps\n\nBy automatically playing the most relevant visible result, users could confirm success without leaving the search context—further compressing the workflow while keeping interaction logic simple.\n\nDue to project timeline constraints, this iteration was scoped for a subsequent phase.",
+                            zh: "在设计探索期间，出现了一个进一步降低视频搜索交互成本的关键机会。\n\n提议的迭代包括：\n• 结果列表中顶部可见事件的自动播放\n• 减少进入事件详情页的导航，消除多余的点击\n\n通过自动播放最相关的可见结果，用户无需离开搜索上下文即可确认成功——进一步压缩工作流，同时保持交互逻辑简单。\n\n由于项目时间表的限制，该迭代被规划在后续阶段。"
+                        },
+                        // REMOVED imageSlot
+                    },
+                    {
+                        title: { en: "Impact & Learnings", zh: "影响与教训" },
+                        content: {
+                            // UPDATED: Content with line breaks
+                            en: "Video Search reduced the cognitive cost of finding events in large camera systems. More importantly, it established a design pattern for introducing AI into existing products:\n• AI accelerates, but does not replace, user workflows\n• Speed is valuable only when control is preserved\n• Trust is built by clarity, not by hiding system behavior",
+                            zh: "视频搜索降低了在大型摄像机系统中寻找事件的认知成本。更重要的是，它建立了将 AI 引入现有产品的设计模式：\n• AI 加速但不替代用户工作流\n• 只有在保留控制权时速度才有价值\n• 信任建立在清晰度之上，而不是隐藏系统行为"
+                        },
+                        // REMOVED imageSlot as requested (actually it was never there, but confirming)
+                    },
+                    {
+                        title: { en: "Design Reflection", zh: "设计反思" },
+                        content: {
+                            en: "Designing AI features is less about intelligence and more about judgment and restraint. This project reinforced my approach:\n• Improve speed without removing agency\n• Reduce steps without hiding complexity\n• Let AI assist—not dominate—the experience",
+                            zh: "设计 AI 功能与其说是关于智能，不如说是关于判断和克制。这个项目强化了我的方法：\n• 在不剥夺代理权的情况下提高速度\n• 在不隐藏复杂性的情况下减少步骤\n• 让 AI 辅助——而不是主导——体验"
+                        }
+                    }
+                ]
+               }
+            ]
+          },
+          {
+            key: 'spatial',
+            projects: [
+               {
+                id: 3, // Moved Green Book to first in spatial
+                title: { en: "Green Book", zh: "绿书" },
+                subtitle: { en: "A Rule-Based Spatial System Design", zh: "基于规则的空间系统设计" }, // Added Subtitle
+                category: { en: "Conceptual Spatial System", zh: "概念空间系统" }, // Updated category
+                year: "2017",
+                location: { en: "Shenzhen, China", zh: "中国 深圳" },
+                role: { en: "Sole Designer", zh: "独立设计师" }, // Updated role
+                focus: {
+                    en: ["· System Logic", "· Rule Definition", "· Constraint-driven Design"], // Added Focus
+                    zh: ["· 系统逻辑", "· 规则定义", "· 约束驱动设计"]
+                },
+                description: { en: "Bookstore concept in Hyde Park. Nature-integrated reading experience.", zh: "海德公园书店概念。自然融合的阅读体验。" },
+                color: "from-green-900/40",
+                 details: [
+                    {
+                        title: { en: "Project Context", zh: "项目背景" },
+                        content: {
+                            en: "GREEN BOOK is a conceptual interior design project focused on system design rather than form-making. Instead of treating space as a static composition, this project explores how a set of abstract rules can generate consistent and scalable spatial outcomes—similar to how design systems govern digital products. The objective was not to design a single space, but to define a framework capable of producing multiple coherent spatial configurations.",
+                            zh: "GREEN BOOK 是一个专注于系统设计而非形式创造的概念室内设计项目。该项目不将空间视为静态的组合，而是探索了一套抽象规则如何生成一致且可扩展的空间结果——类似于设计系统如何管理数字产品。目标不是设计单一空间，而是定义一个能够产生多种连贯空间配置的框架。"
+                        },
+                        imageSlot: { en: "HERO: Primary spatial render", zh: "核心展示：主要空间渲染图" }
+                    },
+                    {
+                        title: { en: "Core Problem", zh: "核心问题" },
+                        content: {
+                            en: "Traditional interior design workflows often rely on intuition and isolated aesthetic decisions.\n\nWhile visually expressive, these approaches are difficult to scale, adapt, or maintain consistency under changing constraints.\nThe challenge in GREEN BOOK was:\n• How to design space without starting from form\n• How to ensure coherence across variations\n• How to let rules—not personal preference—drive outcomes",
+                            zh: "传统的室内设计工作流往往依赖直觉和孤立的审美决策。\n\n虽然具有视觉表现力，但在约束变化下，这些方法难以扩展、适应或保持一致性。\nGREEN BOOK 面临的挑战是：\n• 如何不从形式入手设计空间\n• 如何确保变体之间的一致性\n• 如何让规则——而非个人偏好——驱动结果"
+                        },
+                        // REMOVED imageSlot
+                    },
+                    {
+                        title: { en: "System Thinking Approach", zh: "系统思维方法" },
+                        content: {
+                            en: "The project began by abstracting spatial design into a rule-based system, consisting of:\n• Core principles (hierarchy, rhythm, proportion)\n• Modular spatial units\n• Defined relationships between elements\n• Constraint-based transformations\n\nInstead of asking 'What should this look like?', the guiding question was: 'What rules must always hold true?' Once these rules were established, individual design decisions became outputs of the system rather than isolated choices.",
+                            zh: "该项目始于将空间设计抽象为基于规则的系统，包括：\n• 核心原则（层级、韵律、比例）\n• 模块化空间单元\n• 元素间定义的关系\n• 基于约束的变换\n\n指导性问题不是“它应该看起来像什么？”，而是“哪些规则必须始终成立？”一旦建立了这些规则，个体的设计决策就变成了系统的产出，而非孤立的选择。"
+                        },
+                        imageSlot: { en: "SYSTEM: System structure diagram", zh: "系统：系统结构图" }
+                    },
+                    {
+                        title: { en: "Design Execution", zh: "设计执行" },
+                        content: {
+                            en: "Using the defined system:\n• Spatial layouts were generated through rule combinations\n• Material transitions followed hierarchy logic\n• Visual continuity was preserved across variations\n• Local decisions never violated global constraints\n\nThis allowed the design to remain cohesive even as parameters changed—functionally similar to component-based systems in digital design.",
+                            zh: "利用定义的系统：\n• 通过规则组合生成空间布局\n• 材质转换遵循层级逻辑\n• 视觉连续性在变体中得以保留\n• 局部决策从未违反全局约束\n\n这使得设计即使在参数变化时也能保持凝聚力——在功能上类似于数字设计中的组件化系统。"
+                        },
+                        // REMOVED imageSlot
+                    },
+                    {
+                        title: { en: "Outcome", zh: "成果" },
+                        content: {
+                            en: "The final outcome was not a single fixed space, but a repeatable spatial logic capable of producing multiple valid configurations. The system demonstrated that:\n• Explicit rules reduce subjective decision fatigue\n• Constraints can enable creativity rather than limit it\n• Design quality improves when logic is visible and consistent\n\nDifferent medium. Same design philosophy.",
+                            zh: "最终成果不是单一的固定空间，而是一套可重复的空间逻辑，能够产生多种有效的配置。系统证明了：\n• 明确的规则减少了主观决策疲劳\n• 约束可以激活创造力而非限制它\n• 当逻辑可见且一致时，设计质量得以提升\n\n不同的媒介，相同的设计哲学。"
+                        },
+                        imageSlot: { en: "RESULT: Final spatial render", zh: "结果：最终空间效果图" }
+                    }
+                ]
+              },
+               {
+                id: 1,
+                title: { en: "Impression of Yangtze River", zh: "长江印象" }, 
+                subtitle: { en: "Designing Under Real-World Constraints", zh: "在现实约束下进行设计" }, 
+                category: { en: "Commercial Interior Project", zh: "商业室内项目" }, 
+                year: "2019",
+                location: { en: "Wuhan, China", zh: "中国 武汉" },
+                role: { en: "Lead Interior Designer", zh: "首席室内设计师" }, 
+                focus: {
+                    en: ["· Constraint-driven Design", "· System Integration", "· Stakeholder Alignment"], 
+                    zh: ["· 约束驱动设计", "· 系统集成", "· 利益相关者对齐"]
+                },
+                description: { en: "Restaurant renovation blending bamboo aesthetics with structural elements.", zh: "融合竹韵美学与结构元素的餐厅改造。" },
+                color: "from-emerald-900/40",
+                details: [
+                    {
+                        title: { en: "Project Context", zh: "项目背景" },
+                        content: {
+                            en: "IMPRESSION OF YANGTZE RIVER is a commercial interior project located within an existing building structure, serving a mixed public audience. The project involved redesigning a multi-level interior space under fixed architectural conditions, predefined circulation paths, and business-driven functional requirements. Unlike conceptual work, this project required balancing:\n• Client expectations\n• Structural limitations\n• User flow\n• Cultural narrative\n\nThe challenge was to create a cohesive spatial experience without the freedom to start from scratch.",
+                            zh: "《长江印象》是一个位于现有建筑结构内的商业室内项目，服务于多元化的公众群体。该项目涉及在固定的建筑条件、预定义的动线路径和商业驱动的功能需求下，重新设计一个多层室内空间。不同于概念作品，该项目需要平衡：\n• 客户期望\n• 结构限制\n• 用户流线\n• 文化叙事\n\n挑战在于如何在没有从零开始的自由的情况下，创造连贯的空间体验。"
+                        },
+                        imageSlot: { en: "CONTEXT: Existing building condition, plan, or section", zh: "现状：现有建筑状况、平面图或剖面图" }
+                    },
+                    {
+                        title: { en: "Problem Reality", zh: "现实困境" },
+                        content: {
+                            en: "The space faced several real-world constraints from the outset:\n• The existing building structure could not be altered\n• Vertical circulation and load-bearing elements were fixed\n• Multiple functional zones needed to coexist within limited space\n• The project required integrating cultural identity without becoming decorative or superficial\n\nDesign decisions were tightly coupled—adjusting one area often introduced conflicts elsewhere. This was not a question of aesthetics, but of system coordination.",
+                            zh: "空间从一开始就面临若干现实约束：\n• 现有建筑结构不可更改\n• 垂直交通和承重构件是固定的\n• 多个功能区需在有限空间内共存\n• 项目需要融合文化认同，避免流于装饰或肤浅\n\n设计决策紧密耦合——调整一个区域往往会在其他地方引发冲突。这不仅仅是美学问题，更是系统协调问题。"
+                        },
+                        // REMOVED imageSlot
+                    },
+                    {
+                        title: { en: "Complexity Beneath the Surface", zh: "表面之下的复杂性" },
+                        content: {
+                            en: "The complexity of the project extended beyond physical constraints. Key challenges included: Aligning client vision with operational realities. Managing spatial hierarchy across multiple floors. Ensuring intuitive circulation for first-time visitors. Balancing cultural expression with functional clarity. Each design decision had to account for downstream impact— similar to making changes in a legacy digital system.",
+                            zh: "项目的复杂性延伸到了物理约束之外。关键挑战包括：将客户愿景与运营现实对齐；管理跨越多个楼层的空间层级；确保首次访客的直观动线；平衡文化表达与功能清晰度。每一个设计决策都必须考虑下游影响——类似于在遗留数字系统中进行更改。"
+                        },
+                        imageSlot: { en: "COMPLEXITY: Circulation paths, zoning diagram, or functional overlays", zh: "复杂性：动线路径、分区图或功能叠加" }
+                    },
+                    {
+                        title: { en: "Design Approach", zh: "设计方法" },
+                        content: {
+                            en: "Rather than treating the project as a collection of independent spaces, I approached it as a connected system. The design strategy focused on: Establishing a clear spatial hierarchy. Using circulation as the primary organizing logic. Letting material, light, and proportion reinforce navigation. Applying cultural references through structure and rhythm, not ornament. The goal was to allow users to understand the space intuitively, without signage-heavy guidance.",
+                            zh: "与其将项目视为独立空间的集合，不如将其视为一个互联的系统。设计策略侧重于：\n• 建立清晰的空间层级\n• 以动线作为主要的组织逻辑\n• 利用材质、光线和比例来强化导航\n• 通过结构和韵律而非装饰来应用文化参考\n\n目标是让用户直观地理解空间，而无需依赖繁杂的标识指引。"
+                        },
+                        imageSlot: { en: "SYSTEM: Spatial logic diagram or sequence mapping", zh: "系统：空间逻辑图或序列映射" }
+                    },
+                    {
+                        title: { en: "Design Execution", zh: "设计执行" },
+                        content: {
+                            en: "With the system logic defined: Each zone was designed as part of a continuous experience. Materials transitioned according to spatial hierarchy. Visual anchors were placed to support wayfinding. Cultural elements were embedded into form and proportion rather than applied decoration. Local design decisions were evaluated based on their impact on the overall system.",
+                            zh: "随着系统逻辑的定义：每个区域都被设计为连续体验的一部分；材质根据空间层级进行转换；设置视觉锚点以支持寻路；文化元素嵌入形式和比例中，而非外加装饰；局部设计决策基于其对整体系统的影响进行评估。"
+                        },
+                        imageSlot: { en: "EXECUTION: Different zones showing consistency across materials and proportions", zh: "执行：不同区域展示材质和比例的一致性" }
+                    },
+                    {
+                        title: { en: "Outcome", zh: "成果" },
+                        content: {
+                            en: "The completed space delivered: A coherent spatial narrative across multiple levels. Clear circulation without relying on explicit instruction. Functional clarity for daily operation. A culturally grounded experience that remained contemporary and restrained. The project demonstrated how structure and logic can create emotional impact without sacrificing usability. Different medium. Same design discipline.",
+                            zh: "完工后的空间交付了：跨越多个楼层的连贯空间叙事；无需明确指令的清晰动线；日常运营的功能清晰度；既具有文化底蕴又保持当代和克制的体验。该项目展示了结构和逻辑如何在不牺牲可用性的情况下创造情感冲击。不同的媒介，相同的设计学科。"
+                        },
+                        // ADDED imageGrid with 2 images, 1 per row (handled by component logic)
+                        imageGrid: [
+                            { en: "Outcome View 1", zh: "成果展示 1" },
+                            { en: "Outcome View 2", zh: "成果展示 2" }
+                        ]
+                    }
+                ]
+              },
+              {
+                id: 2,
+                title: { en: "In Those Years", zh: "那些年" },
+                subtitle: { en: "Designing Emotional Experience Through Space", zh: "通过空间设计情感体验" }, // Added Subtitle
+                category: { en: "Experiential Interior Project", zh: "体验式室内项目" }, // Updated Category
+                year: "2014",
+                location: { en: "Wuhan, China", zh: "中国 武汉" },
+                role: { en: "Lead Interior Designer", zh: "首席室内设计师" }, // Updated Role
+                focus: {
+                    en: ["· Narrative Design", "· Emotional Sequencing", "· Human-scale Experience"], // Added Focus
+                    zh: ["· 叙事设计", "· 情感序列", "· 人性化尺度体验"]
+                },
+                description: { en: "An experiential interior project centered on human memory and emotional resonance.", zh: "一个以人类记忆和情感共鸣为中心的体验式室内项目。" },
+                color: "from-orange-900/40",
+                details: [
+                    {
+                        title: { en: "Project Context", zh: "项目背景" },
+                        content: {
+                            en: "IN THOSE YEARS is an interior design project centered on human memory and emotional experience. Unlike system-heavy or function-driven projects, this work focuses on how spatial atmosphere, material, and sequence can evoke a sense of time, familiarity, and quiet reflection. The project explores how space can support emotional presence—not through explicit storytelling, but through carefully controlled sensory cues.",
+                            zh: "《那些年》是一个以人类记忆和情感体验为中心的室内设计项目。不同于侧重系统或功能驱动的项目，该作品关注空间氛围、材质和序列如何唤起时间感、熟悉感和静谧的思考。项目探索了空间如何支持情感存在——不是通过明确的故事讲述，而是通过精心控制的感官线索。"
+                        },
+                        imageSlot: { en: "HERO: Most emotionally tensioned overall space image", zh: "核心展示：最具情绪张力的整体空间图" }
+                    },
+                    {
+                        title: { en: "Design Intention", zh: "设计意图" },
+                        content: {
+                            en: "The core intention was not to recreate a specific memory, but to design a space where personal memories could naturally surface. Key questions guiding the design included:\n• How does a space slow people down?\n• How can material and light trigger emotional recognition?\n• How can transitions between spaces feel gradual rather than abrupt?\n\nThe design avoided symbolic decoration and instead focused on subtle experiential signals.",
+                            zh: "核心意图并非重现特定记忆，而是设计一个让个人记忆自然浮现的空间。指导设计的关键问题包括：\n• 空间如何让人慢下来？\n• 材质和光线如何触发情感共鸣？\n• 空间之间的过渡如何感觉渐进而非突兀？\n\n设计避免了象征性的装饰，转而关注微妙的体验信号。"
+                        },
+                        // REMOVED imageSlot
+                    },
+                    {
+                        title: { en: "Experiential Sequencing", zh: "体验序列" },
+                        content: {
+                            en: "The spatial experience was designed as a continuous emotional journey, rather than a collection of isolated rooms. Key strategies included:\n• Gradual compression and release of space\n• Controlled lighting transitions\n• Soft boundaries between zones\n• Repetition with variation to create rhythm\n\nMovement through the space becomes part of the experience—each step gently preparing the user for the next moment.",
+                            zh: "空间体验被设计为一段连续的情感旅程，而非孤立房间的集合。关键策略包括：\n• 空间的逐渐压缩与释放\n• 受控的光线过渡\n• 区域间的柔性边界\n• 带有变化的重复以创造韵律\n\n穿过空间的移动成为了体验的一部分——每一步都在温柔地为下一刻做准备。"
+                        },
+                        // REMOVED imageSlot
+                    },
+                    {
+                        title: { en: "Design Execution", zh: "设计执行" },
+                        content: {
+                            en: "With the experiential framework in place:\n• Materials were selected for tactile and visual warmth\n• Color and texture shifts were subtle and intentional\n• Furniture and spatial elements supported stillness rather than activity\n• Details were designed to be noticed over time, not immediately\n\nThe design resists instant impact, favoring quiet accumulation of experience.",
+                            zh: "随着体验框架的建立：\n• 选择了具有触感和视觉温暖的材质\n• 颜色和纹理的转变微妙且有意为之\n• 家具和空间元素支持静止而非活动\n• 细节设计为随着时间推移被注意，而非立即显现\n\n设计抵制即时的视觉冲击，偏向于体验的静谧积累。"
+                        },
+                        imageSlot: { en: "SEQUENCE: Spatial sequence diagram or long perspective", zh: "序列：空间序列示意或纵深透视" }
+                    },
+                    {
+                        title: { en: "Outcome", zh: "成果" },
+                        content: {
+                            en: "The completed space offers:\n• A calm, introspective environment\n• Emotional resonance without explicit narrative\n• A sense of familiarity that feels personal rather than designed\n\nUsers are not guided through instructions, but through atmosphere, proportion, and rhythm.",
+                            zh: "完工后的空间提供了：\n• 一个平静、内省的环境\n• 无需明确叙事的情感共鸣\n• 一种感觉私人而非设计出来的熟悉感\n\n用户不是通过指令被引导，而是通过氛围、比例和韵律。"
+                        },
+                        imageGrid: [
+                            { en: "Atmosphere 1", zh: "氛围展示 1" },
+                            { en: "Atmosphere 2", zh: "氛围展示 2" }
+                        ]
+                    }
+                ]
+              }
+            ]
+          },
+          {
+            key: 'visual',
+            projects: [
+               {
+                id: 4,
+                title: { en: "Architectural Visualization", zh: "建筑可视化" },
+                subtitle: { en: "Photorealistic 3D Rendering & Modeling", zh: "写实级3D渲染与建模" },
+                category: { en: "Rendering", zh: "效果图制作" },
+                year: "2018",
+                role: { en: "3D Specialist", zh: "3D专家" },
+                layout: 'gallery',
+                galleryCount: 16,
+                description: { en: "High-fidelity architectural visualizations creating immersive pre-built environments.", zh: "高保真建筑可视化，创造身临其境的未建成环境体验。" },
+                concept: { en: "Using light and texture to evoke emotion before a space exists. Tools: 3ds Max, V-Ray, Lumion.", zh: "在空间存在之前，利用光线和纹理唤起情感。工具：3ds Max, V-Ray, Lumion。" },
+                color: "from-blue-900/40"
+              },
+              {
+                id: 5,
+                title: { en: "Through the Lens", zh: "镜头视角" },
+                subtitle: { en: "Urban & Landscape Photography", zh: "城市与景观摄影" },
+                category: { en: "Photography", zh: "摄影" },
+                year: "2013-2018",
+                role: { en: "Photographer", zh: "摄影师" },
+                layout: 'gallery',
+                galleryCount: 8,
+                description: { en: "Capturing the interplay of light and structure across global landscapes.", zh: "捕捉全球景观中光影与结构的相互作用。" },
+                concept: { en: "Documenting the stillness in chaos and the geometry of nature.", zh: "记录混乱中的宁静与自然的几何美学。" },
+                color: "from-purple-900/40"
+              },
+               {
+                id: 6,
+                title: { en: "Studies in Form, Space, and Perception", zh: "形式、空间与感知的研究" },
+                subtitle: { en: "Sketches, paper works, and exhibition art", zh: "草图、纸艺与展览艺术" },
+                category: { en: "Art", zh: "艺术" },
+                year: "2016",
+                role: { en: "Artist", zh: "艺术家" },
+                layout: 'gallery',
+                galleryCount: 9,
+                description: { en: "Exploring depth and shadow through layered paper compositions.", zh: "通过层叠的纸艺构成探索深度与阴影。" },
+                concept: { en: "Transforming 2D materials into 3D expressions of cultural symbols.", zh: "将二维材料转化为文化符号的三维表达。" },
+                color: "from-pink-900/40"
+              }
+            ]
+          }
+        ];
+
+        /* --- 2. COMPONENTS (DEFINED AFTER DATA) --- */
+
+        // 1. Blueprint Bar Chart
+        const BlueprintBarChart = ({ title, data, icon: Icon }) => {
+            return (
+                <div className="w-full h-full p-6 border border-white/10 bg-white/5 backdrop-blur-sm rounded-lg relative overflow-hidden group hover:border-white/20 transition-colors flex flex-col">
+                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px)', backgroundSize: '15px 15px' }}></div>
+                    <div className="flex items-center gap-2 mb-2 relative z-10 shrink-0">
+                        {Icon && <Icon className="w-4 h-4 text-blue-400" />}
+                        <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-gray-400">{title}</span>
+                    </div>
+                    <div className="flex-1 flex flex-col justify-center gap-2 relative z-10">
+                        {data.map((item, index) => (
+                            <div key={index} className="space-y-1">
+                                <div className="flex justify-between text-[10px] font-sans text-gray-300">
+                                    <span>{item.label}</span>
+                                    <span>{item.value}</span>
+                                </div>
+                                <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                                    <motion.div 
+                                        initial={{ width: 0 }}
+                                        whileInView={{ width: item.percent }}
+                                        transition={{ duration: 1, delay: index * 0.1, ease: "easeOut" }}
+                                        className={`h-full ${item.color || 'bg-blue-500'}`}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            );
+        };
+
+        // 2. Trend Chart
+        const BlueprintTrendChart = ({ title, type = "up", label1, label2, value, icon: Icon }) => {
+            const isUp = type === "up";
+            const colorClass = isUp ? "text-green-400" : "text-blue-400"; 
+            return (
+                <div className="w-full h-full p-6 border border-white/10 bg-white/5 backdrop-blur-sm rounded-lg relative overflow-hidden group hover:border-white/20 transition-colors flex flex-col">
+                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px)', backgroundSize: '15px 15px' }}></div>
+                    <div className="flex justify-between items-start mb-2 relative z-10 shrink-0">
+                        <div className="flex items-center gap-2">
+                            {Icon && <Icon className={`w-4 h-4 ${colorClass}`} />}
+                            <span className="text-[10px] font-sans font-bold uppercase tracking-widest text-gray-400">{title}</span>
+                        </div>
+                        <span className={`text-2xl font-bold ${colorClass}`}>{value}</span>
+                    </div>
+                    <div className="flex-1 w-full relative z-10 border-b border-white/10 min-h-[40px]">
+                         <svg className="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none">
+                            <motion.path
+                                d={isUp ? "M0,60 C20,60 40,40 100,5" : "M0,5 C40,5 60,40 100,60"} 
+                                fill="none"
+                                stroke={isUp ? "#4ade80" : "#60a5fa"}
+                                strokeWidth="2"
+                                strokeDasharray="4 2"
+                                initial={{ pathLength: 0 }}
+                                whileInView={{ pathLength: 1 }}
+                                transition={{ duration: 1.5, ease: "easeInOut" }}
+                                vectorEffect="non-scaling-stroke"
+                            />
+                            <motion.path 
+                                d={isUp ? "M0,60 C20,60 40,40 100,5 V64 H0 Z" : "M0,5 C40,5 60,40 100,60 V64 H0 Z"}
+                                fill={isUp ? "url(#gradUp)" : "url(#gradDown)"}
+                                initial={{ opacity: 0 }}
+                                whileInView={{ opacity: 0.3 }}
+                                transition={{ duration: 1 }}
+                                vectorEffect="non-scaling-stroke"
+                            />
+                            <defs>
+                                <linearGradient id="gradUp" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#4ade80" stopOpacity="0.5"/>
+                                    <stop offset="100%" stopColor="#4ade80" stopOpacity="0"/>
+                                </linearGradient>
+                                <linearGradient id="gradDown" x1="0" y1="0" x2="0" y2="1">
+                                    <stop offset="0%" stopColor="#60a5fa" stopOpacity="0.5"/>
+                                    <stop offset="100%" stopColor="#60a5fa" stopOpacity="0"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+                    <div className="flex justify-between mt-2 text-[10px] font-sans text-gray-500 uppercase shrink-0">
+                        <span>{label1}</span>
+                        <span>{label2}</span>
+                    </div>
+                </div>
+            );
+        };
+
+        // 3. Global Background
+        const GlobalBackground = ({ scrollYProgress, mouseX, mouseY }) => {
+          const yGrid = useTransform(scrollYProgress, [0, 1], ['0%', '20%']);
+          const glowX = useSpring(mouseX, { stiffness: 50, damping: 25 });
+          const glowY = useSpring(mouseY, { stiffness: 50, damping: 25 });
+          const particles = useMemo(() => {
+            return [...Array(35)].map((_, i) => ({
+              id: i,
+              left: Math.random() * 100,
+              top: Math.random() * 100,
+              size: Math.random() * 3 + 1,
+              duration: Math.random() * 15 + 10,
+              delay: Math.random() * 10,
+              moveX: Math.random() * 50 - 25
+            }));
+          }, []);
+
+          return (
+            <div className="fixed inset-0 z-[-1] bg-[#050505] overflow-hidden perspective-1000">
+              <motion.div 
+                className="absolute w-[800px] h-[800px] bg-white rounded-full blur-[150px] pointer-events-none mix-blend-screen hidden md:block opacity-[0.03]"
+                style={{ x: glowX, y: glowY, translateX: '-50%', translateY: '-50%' }}
+              />
+              <div className="absolute inset-0 pointer-events-none">
+                {particles.map((p) => (
+                  <motion.div
+                    key={p.id}
+                    className="absolute bg-white/30 rounded-full"
+                    style={{ left: `${p.left}%`, top: `${p.top}%`, width: p.size, height: p.size }}
+                    animate={{ y: [0, -150], x: [0, p.moveX], opacity: [0, 0.6, 0] }}
+                    transition={{ duration: p.duration, repeat: Infinity, ease: "linear", delay: p.delay }}
+                  />
+                ))}
+              </div>
+              <div className="absolute inset-0 opacity-60">
+                <motion.div 
+                  animate={{ scale: [1, 1.2, 1], rotate: [0, 45, 0], opacity: [0.3, 0.5, 0.3] }}
+                  transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute top-[-20%] left-[-10%] w-[90vw] h-[90vw] bg-gradient-to-br from-blue-900/20 to-purple-900/20 rounded-full blur-[150px] mix-blend-screen"
+                />
+                <motion.div 
+                  animate={{ scale: [1, 1.5, 1], x: [0, 100, 0], opacity: [0.2, 0.4, 0.2] }}
+                  transition={{ duration: 25, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute bottom-[-20%] right-[-10%] w-[80vw] h-[80vw] bg-indigo-900/20 rounded-full blur-[150px] mix-blend-screen"
+                />
+              </div>
+              <motion.div style={{ y: yGrid }} animate={{ opacity: [0.05, 0.12, 0.05] }} transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }} className="absolute inset-[-50%]">
+                 <div className="w-full h-full" style={{ backgroundImage: `linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)`, backgroundSize: '100px 100px' }} />
+              </motion.div>
+              <div className="absolute inset-0 opacity-[0.05] pointer-events-none mix-blend-overlay" style={{ backgroundImage: 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.8\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%25\' height=\'100%25\' filter=\'url(%23noiseFilter)\' opacity=\'1\'/%3E%3C/svg%3E")' }} />
+            </div>
+          );
+        };
+
+        // 4. Custom Cursor
+        const CustomCursor = () => {
+          const mouseX = useMotionValue(-100);
+          const mouseY = useMotionValue(-100);
+          const springConfig = { damping: 20, stiffness: 400 };
+          const cursorX = useSpring(mouseX, springConfig);
+          const cursorY = useSpring(mouseY, springConfig);
+          const [hoverState, setHoverState] = useState('default');
+
+          useEffect(() => {
+            if (typeof window !== 'undefined' && window.matchMedia("(pointer: fine)").matches) {
+                const moveCursor = (e) => { mouseX.set(e.clientX); mouseY.set(e.clientY); };
+                const handleMouseOver = (e) => {
+                  const target = e.target;
+                  if (target.tagName === 'A' || target.tagName === 'BUTTON' || target.closest('.interactive')) {
+                    setHoverState('pointer');
+                  } else {
+                    setHoverState('default');
+                  }
+                };
+                window.addEventListener('mousemove', moveCursor);
+                window.addEventListener('mouseover', handleMouseOver);
+                return () => { window.removeEventListener('mousemove', moveCursor); window.removeEventListener('mouseover', handleMouseOver); };
+            }
+          }, []);
+
+          return (
+            <div className="fixed inset-0 pointer-events-none z-[100] hidden md:block">
+              <motion.div className="absolute top-0 left-0 w-3 h-3 bg-white rounded-full mix-blend-difference" style={{ x: cursorX, y: cursorY, translateX: '-50%', translateY: '-50%' }} />
+              <motion.div className="absolute top-0 left-0 w-10 h-10 border border-white rounded-full mix-blend-difference" style={{ x: cursorX, y: cursorY, translateX: '-50%', translateY: '-50%' }} animate={{ scale: hoverState === 'pointer' ? 1.5 : 1 }} transition={{ duration: 0.2 }} />
+            </div>
+          );
+        };
+
+        // 5. Placeholder Art
+        const PlaceholderArt = ({ className }) => (
+          <div className={`w-full h-full bg-[#111] relative overflow-hidden ${className}`}>
+             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(255,255,255,0.05),transparent_70%)]" />
+             <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
+             <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/2 h-1/2 border border-white/20 rounded-full flex items-center justify-center`}>
+                <div className="w-2/3 h-2/3 border border-white/10 rotate-45" />
+             </div>
+          </div>
+        );
+
+        // 6. Project List Item
+        const ProjectListItem = ({ project, lang, index, setHoveredProject, openProject, displayIndex }) => {
+          return (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: index * 0.05 }}
+              onMouseEnter={() => setHoveredProject(project)}
+              onMouseLeave={() => setHoveredProject(null)}
+              onClick={() => openProject(project)}
+              className="group relative border-t border-white/10 py-8 md:py-12 cursor-pointer interactive overflow-hidden"
+            >
+              <div className="container mx-auto px-6 md:px-12 flex justify-between items-center md:items-start relative z-10">
+                <div className="flex flex-row gap-4 md:gap-12 transition-transform duration-500 md:group-hover:translate-x-4 items-start">
+                  <span className="text-base md:text-lg font-sans font-bold text-gray-200 shrink-0 mt-1 md:mt-3">0{displayIndex}</span>
+                  <div className="flex flex-col gap-1 md:gap-2">
+                      <h3 className="text-2xl md:text-5xl font-bold tracking-tight text-white md:group-hover:text-transparent md:group-hover:bg-clip-text md:group-hover:bg-gradient-to-r md:group-hover:from-white md:group-hover:to-gray-400 transition-all leading-tight">
+                        {project.title[lang]}
+                      </h3>
+                      {project.subtitle && (
+                        <span className="text-xs md:text-sm text-gray-400 font-sans font-medium tracking-wide block">
+                            {project.subtitle[lang]}
+                        </span>
+                      )}
+                  </div>
+                </div>
+                <div className="hidden md:flex flex-col items-end text-right transition-transform duration-500 group-hover:-translate-x-4 shrink-0 ml-8">
+                  <span className="text-base font-sans text-gray-300 font-medium">{project.category[lang]}</span>
+                  <span className="text-sm text-gray-400 mt-1">{project.year}</span>
+                </div>
+                <ArrowUpRight className="md:hidden w-5 h-5 text-gray-400" />
+              </div>
+              <motion.div className="hidden md:block absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+            </motion.div>
+          );
+        };
+
+        // 7. Floating Preview
+        const FloatingPreview = ({ hoveredProject, mousePos }) => {
+          if (!hoveredProject) return null;
+          return (
+            <motion.div
+              className="fixed pointer-events-none z-20 hidden md:block overflow-hidden"
+              style={{ top: 0, left: 0, x: mousePos.x, y: mousePos.y }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1, x: mousePos.x.get() + 20, y: mousePos.y.get() - 150 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              transition={{ type: "spring", stiffness: 150, damping: 15 }}
+            >
+              <div className="w-[400px] h-[250px] bg-[#1a1a1a]/80 backdrop-blur-md rounded-lg overflow-hidden border border-white/10 shadow-2xl relative">
+                <PlaceholderArt />
+                <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+                     <p className="text-white font-sans text-sm uppercase tracking-widest font-bold">{hoveredProject.year}</p>
+                </div>
+              </div>
+            </motion.div>
+          );
+        };
+
+        // 8. AI Chat Bot
+        const AIChatBot = ({ lang }) => {
+          const t = translations[lang].ai;
+          const [isOpen, setIsOpen] = useState(false);
+          const [messages, setMessages] = useState([]); 
+          const [inputText, setInputText] = useState('');
+          const [isLoading, setIsLoading] = useState(false);
+          const messagesEndRef = useRef(null);
+          useEffect(() => { setMessages([{ role: 'assistant', text: t.greeting }]); }, [lang]);
+          useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: "smooth" }); }, [messages]);
+          const systemPrompt = `You are Fei Chen, a UX/UI and Spatial Designer. Resume Context: - Role: UX/UI Designer & Spatial Designer. - Projects: IAP Flow Optimization, Service Plan Redesign. Rule: Reply in the user's language.`;
+          const handleSendMessage = async () => {
+            if (!inputText.trim()) return;
+            const userMsg = { role: 'user', text: inputText };
+            setMessages(prev => [...prev, userMsg]);
+            setInputText('');
+            setIsLoading(true);
+            try {
+              const apiKey = ""; 
+              const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ contents: [{ role: "user", parts: [{ text: systemPrompt + "\n\nUser Question: " + inputText }] }], generationConfig: { maxOutputTokens: 1000 } }),
+              });
+              if (!response.ok) throw new Error("API Error");
+              const data = await response.json();
+              const aiResponseText = data.candidates?.[0]?.content?.parts?.[0]?.text || "Empty response.";
+              setMessages(prev => [...prev, { role: 'assistant', text: aiResponseText }]);
+            } catch (error) {
+              setMessages(prev => [...prev, { role: 'assistant', text: "Offline mode. Please add your API Key in the code to enable chat." }]);
+            } finally { setIsLoading(false); }
+          };
+          return (
+            <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end font-sans">
+              <AnimatePresence>
+                {isOpen && (
+                  <motion.div initial={{ opacity: 0, y: 20, scale: 0.9 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: 0.9 }} className="mb-4 w-[90vw] md:w-[350px] h-[50vh] md:h-[500px] bg-[#0f0f0f]/95 backdrop-blur-xl border border-white/20 shadow-2xl overflow-hidden rounded-xl flex flex-col">
+                    <div className="p-4 border-b border-white/10 flex justify-between items-center bg-white/5 shrink-0">
+                      <span className="text-xs font-bold uppercase tracking-widest text-gray-300">Fei</span>
+                      <button onClick={() => setIsOpen(false)}><X className="w-5 h-5 text-white" /></button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-white/10">
+                      {messages.map((msg, idx) => (
+                        <div key={idx} className={`text-base leading-relaxed ${msg.role === 'user' ? 'text-right text-white' : 'text-left text-gray-200'}`}>
+                          <span className={`inline-block p-3 rounded-lg max-w-[85%] ${msg.role === 'user' ? 'bg-blue-900/30 border border-blue-500/30' : 'bg-white/5 border border-white/10'}`}>{msg.text}</span>
+                        </div>
+                      ))}
+                      {isLoading && <div className="text-sm text-gray-400 animate-pulse">Computing...</div>}
+                      <div ref={messagesEndRef} />
+                    </div>
+                    <div className="p-4 border-t border-white/10 flex gap-2 shrink-0 bg-black/40">
+                      <input
+                        className="bg-transparent text-base text-white flex-1 outline-none placeholder:text-gray-500"
+                        placeholder={t.placeholder}
+                        value={inputText}
+                        onChange={(e) => setInputText(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
+                      />
+                      <button onClick={handleSendMessage}><Send className="w-4 h-4 text-white" /></button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+              <button onClick={() => setIsOpen(!isOpen)} className="w-12 h-12 md:w-14 md:h-14 border border-white/20 flex items-center justify-center bg-black/50 backdrop-blur-md hover:bg-white hover:text-black transition-colors interactive rounded-full shadow-lg">
+                {isOpen ? <X className="w-5 h-5" /> : <MessageSquare className="w-5 h-5" />}
+              </button>
+            </div>
+          );
+        };
+
+        // NEW: Content Renderer for list support
+        const ContentRenderer = ({ text }) => {
+            if (!text) return null;
+            return text.split('\n').map((line, i) => {
+                const trimmed = line.trim();
+                if (!trimmed) return <div key={i} className="h-4" />;
+                if (trimmed.startsWith('•') || trimmed.startsWith('-')) {
+                    return (
+                        <div key={i} className="flex items-start gap-3 pl-4 mb-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2.5 shrink-0 opacity-80" /> 
+                            <span className="flex-1">{trimmed.substring(1).trim()}</span>
+                        </div>
+                    );
+                }
+                return <p key={i} className="mb-4">{line}</p>;
+            });
+        };
+
+        // NEW: Lightbox Component (Fixed Portal & Scroll Lock)
+        const Lightbox = ({ images, initialIndex, onClose }) => {
+            const [currentIndex, setCurrentIndex] = useState(initialIndex);
+            
+            // Handle Keyboard Navigation
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if (e.key === 'Escape') onClose();
+                    if (e.key === 'ArrowLeft') showPrev();
+                    if (e.key === 'ArrowRight') showNext();
+                };
+                window.addEventListener('keydown', handleKeyDown);
+                return () => window.removeEventListener('keydown', handleKeyDown);
+            }, [currentIndex]); 
+
+            // Scroll lock on body
+            useEffect(() => {
+                document.body.style.overflow = 'hidden';
+                return () => {
+                    document.body.style.overflow = 'unset';
+                };
+            }, []);
+
+            const showPrev = () => {
+                setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+            };
+
+            const showNext = () => {
+                setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+            };
+
+            if (!images || images.length === 0) return null;
+
+            const currentImage = images[currentIndex];
+            const isPlaceholder = currentImage.type === 'placeholder';
+
+            return (
+                <div className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-12 cursor-auto">
+                    {/* Controls */}
+                    <button onClick={onClose} className="absolute top-6 right-6 p-2 bg-white/10 hover:bg-white/20 rounded-full transition-colors z-50 text-white cursor-pointer">
+                        <X className="w-6 h-6" />
+                    </button>
+                    
+                    <button onClick={showPrev} className="absolute left-4 md:left-8 p-4 bg-white/5 hover:bg-white/10 rounded-full transition-colors z-50 text-white hidden md:block cursor-pointer">
+                        <ChevronLeft className="w-8 h-8" />
+                    </button>
+
+                    <button onClick={showNext} className="absolute right-4 md:right-8 p-4 bg-white/5 hover:bg-white/10 rounded-full transition-colors z-50 text-white hidden md:block cursor-pointer">
+                        <ChevronRight className="w-8 h-8" />
+                    </button>
+
+                    {/* Image / Content */}
+                    <div className="relative w-full h-full flex items-center justify-center">
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={currentIndex}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ duration: 0.2 }}
+                                className="relative max-w-full max-h-full flex flex-col items-center justify-center"
+                            >
+                                {isPlaceholder ? (
+                                    <div className="w-[80vw] max-w-[90vw] aspect-video max-h-[85vh] bg-[#1a1a1a] border border-white/10 rounded-lg flex flex-col items-center justify-center p-12 text-center relative overflow-hidden">
+                                         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)', backgroundSize: '60px 60px' }}></div>
+                                         <div className="w-32 h-32 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-6"><ImageIcon className="w-12 h-12 text-white/40" /></div>
+                                         <h3 className="text-2xl md:text-4xl font-bold text-white mb-2 uppercase tracking-wide">{currentImage.label}</h3>
+                                         <p className="text-white/50 font-mono">Image Placeholder</p>
+                                    </div>
+                                ) : (
+                                    <img 
+                                        src={currentImage.src} 
+                                        alt={currentImage.label || "Project Image"} 
+                                        className="max-w-[80vw] max-h-[85vh] object-contain rounded-lg shadow-2xl border border-white/10"
+                                    />
+                                )}
+                                
+                                {/* Caption / Counter */}
+                                <div className="absolute bottom-[-50px] md:bottom-[-60px] left-0 right-0 text-center">
+                                    <span className="text-sm font-mono text-white/60 tracking-widest">
+                                        {currentIndex + 1} / {images.length}
+                                    </span>
+                                </div>
+                            </motion.div>
+                        </AnimatePresence>
+                    </div>
+                </div>
+            );
+        };
+        
+        const MasonryGallery = ({ imageCount, onImageClick }) => {
+            const images = useMemo(() => {
+                return Array.from({ length: imageCount }).map((_, i) => {
+                    const aspect = [3/2, 2/3, 1][Math.floor(Math.random() * 3)];
+                    const width = 800;
+                    const height = Math.floor(width / aspect);
+                    return {
+                        src: `https://placehold.co/${width}x${height}/1a1a1a/FFF?text=Img+${i+1}`,
+                        alt: `Gallery Image ${i+1}`,
+                        label: `Gallery ${i+1}`
+                    };
+                });
+            }, [imageCount]);
+
+            return (
+                <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4 p-4">
+                    {images.map((img, idx) => (
+                        <div 
+                            key={idx} 
+                            className="break-inside-avoid relative group rounded-lg overflow-hidden cursor-zoom-in mb-4"
+                            onClick={() => onImageClick(img.src)}
+                        >
+                            <img 
+                                src={img.src} 
+                                alt={`Gallery ${idx}`} 
+                                className="w-full h-auto object-cover transform transition-transform duration-500 group-hover:scale-110"
+                            />
+                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300 pointer-events-none" />
+                        </div>
+                    ))}
+                </div>
+            );
+        };
+
+        /* --- Project Detail View --- */
+        const ProjectDetail = ({ project, lang, onClose }) => {
+          const t = translations[lang].sections;
+          const [lightboxOpen, setLightboxOpen] = useState(false);
+          const [lightboxIndex, setLightboxIndex] = useState(0);
+          
+          const isGallery = project.layout === 'gallery';
+
+          useEffect(() => {
+            document.body.style.overflow = 'hidden';
+            return () => { document.body.style.overflow = 'unset'; };
+          }, []);
+
+          // Collect all images
+          const galleryImages = useMemo(() => {
+              const imgs = [];
+              
+              if (isGallery && project.galleryCount) {
+                   const generated = Array.from({ length: project.galleryCount }).map((_, i) => {
+                        const aspect = [3/2, 2/3, 1][Math.floor(Math.random() * 3)];
+                        const width = 800;
+                        const height = Math.floor(width / aspect);
+                        return {
+                            type: 'img',
+                            src: `https://placehold.co/${width}x${height}/1a1a1a/FFF?text=Img+${i+1}`,
+                            label: `Gallery ${i+1}`
+                        };
+                    });
+                    return generated;
+              }
+
+              if (project.heroImage) {
+                  imgs.push({ type: 'img', src: project.heroImage, label: "Hero Image" });
+              } else {
+                  imgs.push({ type: 'placeholder', label: "Hero Image Placeholder" });
+              }
+
+              if (project.details) {
+                  project.details.forEach(section => {
+                      if (section.imageSlot) {
+                          const isUrl = section.imageSlot[lang].startsWith('http'); 
+                          imgs.push({ 
+                              type: isUrl ? 'img' : 'placeholder', 
+                              src: isUrl ? section.imageSlot[lang] : undefined,
+                              label: isUrl ? "Detail Image" : section.imageSlot[lang] 
+                          });
+                      }
+                      if (section.imageGrid) {
+                          section.imageGrid.forEach(imgItem => {
+                              const label = imgItem[lang];
+                              const isUrl = label.startsWith('http');
+                              imgs.push({
+                                  type: isUrl ? 'img' : 'placeholder',
+                                  src: isUrl ? label : undefined,
+                                  label: isUrl ? "Gallery Image" : label
+                              });
+                          });
+                      }
+                  });
+              }
+              return imgs;
+          }, [project, lang, isGallery]);
+
+          const openLightbox = (index) => {
+              setLightboxIndex(index);
+              setLightboxOpen(true);
+          };
+          
+          const handleGalleryImageClick = (src) => {
+              const index = galleryImages.findIndex(img => img.src === src);
+              if (index !== -1) openLightbox(index);
+          };
+
+          let renderImageIndex = 0; 
+
+          return (
+            <>
+                {lightboxOpen && createPortal(
+                  <Lightbox 
+                      images={galleryImages} 
+                      initialIndex={lightboxIndex} 
+                      onClose={() => setLightboxOpen(false)} 
+                  />,
+                  document.body
+                )}
+
+                <motion.div 
+                    initial={{ y: '100%' }} 
+                    animate={{ y: 0 }} 
+                    exit={{ y: '100%' }} 
+                    transition={{ type: "spring", damping: 25, stiffness: 200 }} 
+                    className={`fixed inset-0 z-50 bg-[#0a0a0a]/95 md:bg-[#0a0a0a]/85 backdrop-blur-xl md:backdrop-blur-2xl ${lightboxOpen ? 'overflow-hidden' : 'overflow-y-auto'}`}
+                >
+                  
+                  <div className="container mx-auto px-6 md:px-12 py-8 md:py-12 relative z-10">
+                    <div className="flex justify-between items-center mb-12 md:mb-20">
+                        <button onClick={onClose} className="text-sm font-sans font-bold uppercase tracking-widest text-gray-300 hover:text-white flex items-center gap-2 interactive"><ArrowLeft className="w-4 h-4" /> {translations[lang].nav.back}</button>
+                        <span className="text-sm font-sans font-medium text-gray-400">{project.year} — {project.category[lang]}</span>
+                    </div>
+                    
+                    <motion.h1 initial={{ opacity: 0, y: 50 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="text-4xl md:text-6xl lg:text-8xl font-bold leading-[1.1] mb-8 md:mb-12 tracking-tight">{project.title[lang]}</motion.h1>
+                    
+                    {!isGallery && (
+                        <div 
+                            className="w-full aspect-video bg-[#111]/50 mb-12 md:mb-20 relative overflow-hidden border border-white/10 rounded-lg group cursor-zoom-in"
+                            onClick={() => openLightbox(0)} 
+                        >
+                            {project.heroImage ? (
+                                <img src={project.heroImage} alt="Hero" className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
+                            ) : (
+                                <PlaceholderArt className="opacity-50 group-hover:opacity-70 transition-opacity duration-500" />
+                            )}
+                            <div className={`absolute inset-0 bg-gradient-to-t ${project.color} to-transparent opacity-20`} />
+                            <div className="absolute top-4 right-4 bg-black/50 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><Maximize2 className="w-5 h-5 text-white" /></div>
+                        </div>
+                    )}
+
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-8 md:gap-12 mb-20 md:mb-32">
+                        {!isGallery && (
+                            <div className="md:col-span-3 space-y-6 md:space-y-8 font-sans text-sm md:text-base border-t border-white/10 pt-6 md:pt-8 sticky top-24 self-start">
+                                {project.role && (<div><span className="text-gray-400 font-bold block mb-2">Role</span>{project.role[lang]}</div>)}
+                                {project.category && (<div><span className="text-gray-400 font-bold block mb-2">Type</span>{project.category[lang]}</div>)}
+                                {project.location && (<div><span className="text-gray-400 font-bold block mb-2">Location</span>{project.location[lang]}</div>)}
+                                {project.platforms && (<div><span className="text-gray-400 font-bold block mb-2">Surface</span>{project.platforms[lang]}</div>)}
+                                {project.duration && (<div><span className="text-gray-400 font-bold block mb-2">Duration</span>{project.duration[lang]}</div>)}
+                                {project.focus && (
+                                    <div>
+                                        <span className="text-gray-400 font-bold block mb-2">Focus</span>
+                                        {Array.isArray(project.focus[lang]) ? (<ul className="space-y-1">{project.focus[lang].map((item, idx) => (<li key={idx} className="text-gray-300">{item}</li>))}</ul>) : (project.focus[lang])}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        <div className={isGallery ? "col-span-1 md:col-span-12 border-t border-white/10 pt-6 md:pt-8 relative" : "md:col-span-9 border-t border-white/10 pt-6 md:pt-8 relative"}>
+                            <p className="text-lg md:text-2xl font-normal leading-relaxed text-gray-100 mb-20 max-w-4xl">{project.description[lang]}</p>
+                            
+                            {isGallery ? (
+                                <MasonryGallery imageCount={project.galleryCount} onImageClick={handleGalleryImageClick} />
+                            ) : (
+                                project.details ? (
+                                    <div className="space-y-24 md:space-y-32">
+                                        {project.details.map((section, idx) => (
+                                            <div key={idx} className="relative group border-l border-transparent md:border-none">
+                                                <div className="flex flex-col gap-8">
+                                                    <div className="space-y-4 max-w-3xl">
+                                                        <div className="flex items-baseline gap-4">
+                                                            <span className="text-4xl font-bold text-white/20 opacity-100 select-none">0{idx + 1}</span>
+                                                            <h3 className="text-2xl md:text-3xl font-bold text-white leading-tight">{section.title[lang].replace(/^\d+\)\s*/, '')}</h3>
+                                                        </div>
+                                                        <div className="text-gray-300 leading-relaxed text-base md:text-lg">
+                                                            <ContentRenderer text={section.content[lang]} />
+                                                        </div>
+                                                    </div>
+                                                    <div className="w-full mt-4">
+                                                        {section.impactGrid ? (
+                                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full h-auto md:aspect-[16/9]">
+                                                                {section.impactGrid.map((chart, cIdx) => (
+                                                                    <div key={cIdx} className="h-full min-h-[250px]">
+                                                                        {chart.type === 'bar' ? (<BlueprintBarChart title={chart.title[lang]} data={chart.data} icon={chart.icon} />) : (<BlueprintTrendChart title={chart.title[lang]} type={chart.trend} value={chart.value} label1={chart.labels.start} label2={chart.labels.end} icon={chart.icon} />)}
+                                                                    </div>
+                                                                ))}
+                                                             </div>
+                                                        ) : section.chartData ? (
+                                                            <div className="w-full aspect-[16/9]">
+                                                                {section.chartData.type === 'bar' ? (<BlueprintBarChart title={section.chartData.title[lang]} data={section.chartData.data} />) : (<BlueprintTrendChart title={section.chartData.title[lang]} label1={section.chartData.labels.start} label2={section.chartData.labels.end} />)}
+                                                            </div>
+                                                        ) : section.imageGrid ? ( 
+                                                             <div className="grid grid-cols-1 gap-8 w-full"> 
+                                                                {section.imageGrid.map((img, i) => {
+                                                                     renderImageIndex++; 
+                                                                     const thisImageIndex = renderImageIndex; 
+                                                                     return (
+                                                                         <div 
+                                                                            key={i} 
+                                                                            className="w-full aspect-video p-8 border border-white/10 bg-white/5 backdrop-blur-sm rounded-lg flex flex-col items-center justify-center text-center gap-4 relative overflow-hidden group hover:border-white/20 transition-all hover:bg-white/10 cursor-zoom-in"
+                                                                            onClick={() => openLightbox(thisImageIndex)}
+                                                                         >
+                                                                            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
+                                                                            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 translate-y-[-100%] group-hover:translate-y-[100%] transition-all duration-1000 ease-in-out pointer-events-none"></div>
+                                                                            <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform z-10"><ImageIcon className="w-8 h-8 text-white/60" /></div>
+                                                                            <div className="z-10 px-4 py-2 bg-black/40 border border-white/10 rounded"><span className="text-xs font-mono text-white/70 uppercase tracking-widest">{img[lang]}</span></div>
+                                                                            <div className="absolute top-4 right-4 bg-black/50 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><Maximize2 className="w-5 h-5 text-white" /></div>
+                                                                         </div>
+                                                                     );
+                                                                })}
+                                                             </div>
+                                                        ) : section.imageSlot && (() => {
+                                                            renderImageIndex++; 
+                                                            const thisImageIndex = renderImageIndex;
+                                                            return (
+                                                                <div 
+                                                                    className="w-full aspect-[16/9] p-8 border border-white/10 bg-white/5 backdrop-blur-sm rounded-lg flex flex-col items-center justify-center text-center gap-4 relative overflow-hidden group hover:border-white/20 transition-all hover:bg-white/10 cursor-zoom-in"
+                                                                    onClick={() => openLightbox(thisImageIndex)}
+                                                                >
+                                                                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
+                                                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 translate-y-[-100%] group-hover:translate-y-[100%] transition-all duration-1000 ease-in-out pointer-events-none"></div>
+                                                                    <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform z-10"><ImageIcon className="w-8 h-8 text-white/60" /></div>
+                                                                    <div className="z-10 px-4 py-2 bg-black/40 border border-white/10 rounded"><span className="text-xs font-mono text-white/70 uppercase tracking-widest">{section.imageSlot[lang]}</span></div>
+                                                                    <div className="absolute top-4 right-4 bg-black/50 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><Maximize2 className="w-5 h-5 text-white" /></div>
+                                                                </div>
+                                                            );
+                                                        })()}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="mt-8 md:mt-12 p-6 md:p-8 bg-white/5 border border-white/5 backdrop-blur-md rounded-lg">
+                                        <h3 className="font-sans text-sm font-bold uppercase text-gray-400 mb-4">{t.concept}</h3>
+                                        <p className="text-base md:text-lg text-gray-200 leading-relaxed">{project.concept ? project.concept[lang] : "Design concept loading..."}</p>
+                                    </div>
+                                )
+                            )}
+                        </div>
+                    </div>
+                    <div className="border-t border-white/20 py-12 md:py-20 text-center">
+                        <button onClick={onClose} className="text-3xl md:text-5xl font-bold hover:text-transparent hover:bg-clip-text hover:bg-gradient-to-r hover:from-gray-200 hover:to-gray-500 transition-all interactive">View All Works</button>
+                    </div>
+                  </div>
+                </motion.div>
+            </>
+          );
+        };
+
+        /* --- Main App --- */
+        const App = () => {
+          const [lang, setLang] = useState('en');
+          const [selectedProject, setSelectedProject] = useState(null);
+          const [hoveredProject, setHoveredProject] = useState(null);
+          const [scrolled, setScrolled] = useState(false);
+          const mouseX = useMotionValue(0);
+          const mouseY = useMotionValue(0);
+          const { scrollYProgress } = useScroll();
+          
+          useEffect(() => {
+            if (typeof window !== 'undefined' && window.matchMedia("(pointer: fine)").matches) {
+                const handleMouseMove = (e) => { mouseX.set(e.clientX); mouseY.set(e.clientY); };
+                window.addEventListener('mousemove', handleMouseMove);
+                return () => window.removeEventListener('mousemove', handleMouseMove);
+            }
+          }, []);
+
+          useEffect(() => {
+            const handleScroll = () => {
+              setScrolled(window.scrollY > 20);
+              if (hoveredProject) setHoveredProject(null);
+            };
+            window.addEventListener('scroll', handleScroll);
+            return () => window.removeEventListener('scroll', handleScroll);
+          }, [hoveredProject]);
+
+          const t = translations[lang];
+          let globalIndexCounter = 0;
+
+          return (
+            <div className="min-h-screen text-white font-sans selection:bg-white selection:text-black overflow-x-hidden relative">
+              <CustomCursor />
+              <GlobalBackground scrollYProgress={scrollYProgress} mouseX={mouseX} mouseY={mouseY} />
+              <AIChatBot lang={lang} />
+              <AnimatePresence>{hoveredProject && <FloatingPreview hoveredProject={hoveredProject} mousePos={{x: mouseX, y: mouseY}} />}</AnimatePresence>
+              <AnimatePresence>{selectedProject && <ProjectDetail project={selectedProject} lang={lang} onClose={() => setSelectedProject(null)} />}</AnimatePresence>
+
+              <nav className={`fixed top-0 w-full z-40 px-6 md:px-12 transition-all duration-300 flex justify-between items-center md:items-start text-white border-b ${scrolled ? 'py-4 bg-[#050505]/80 backdrop-blur-md border-white/10' : 'py-6 md:py-8 border-transparent'}`}>
+                <div className="text-lg font-bold tracking-tighter interactive cursor-pointer">FEI CHEN.</div>
+                <div className="flex gap-4 md:gap-8 items-center md:items-start">
+                    <div className="hidden md:flex flex-col text-right gap-1 font-sans text-sm font-medium text-gray-300">
+                        <a href="#work" className="hover:text-white interactive uppercase">Works</a>
+                        <a href="#about" className="hover:text-white interactive uppercase">Profile</a>
+                        <a href="#contact" className="hover:text-white interactive uppercase">Contact</a>
+                    </div>
+                    <button onClick={() => setLang(lang === 'en' ? 'zh' : 'en')} className="font-sans font-bold text-xs border border-white/20 px-3 py-1 rounded-full hover:bg-white hover:text-black transition-colors interactive">{lang === 'en' ? 'EN' : '中'}</button>
+                </div>
+              </nav>
+
+              <section className="min-h-screen flex flex-col justify-center px-6 md:px-12 pt-24 md:pt-32 relative">
+                 <div className="max-w-full md:max-w-[90vw]">
+                     <motion.h1 initial={{ opacity: 0, y: 100 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }} className="text-6xl md:text-[10vw] leading-[0.9] font-bold tracking-tight uppercase mix-blend-difference">{t.hero.title_line1} <br/><span className="text-gray-400">{t.hero.title_line2}</span></motion.h1>
+                 </div>
+                 <div className="mt-12 md:mt-20 flex flex-col md:flex-row justify-between items-start md:items-end border-t border-white/10 pt-6">
+                    <p className="text-gray-300 text-base md:text-lg leading-relaxed font-normal whitespace-normal md:whitespace-nowrap">{t.hero.desc}</p>
+                    <div className="mt-8 md:mt-0 flex items-center gap-2 text-sm font-bold uppercase text-gray-400 animate-pulse"><ArrowRight className="w-4 h-4 rotate-90" /> {t.hero.scroll}</div>
+                 </div>
+              </section>
+
+              <section id="work" className="py-20 md:py-32">
+                <div className="px-6 md:px-12 mb-8 md:mb-12 flex items-baseline justify-between"><h2 className="text-sm font-bold uppercase text-gray-400 tracking-widest">{t.sections.selected}</h2><span className="text-sm font-medium text-gray-400">07 Projects</span></div>
+                {projectGroups.map((group) => (
+                    <div key={group.key} className="mb-20">
+                        <div className="px-6 md:px-12 mb-8 flex items-center gap-4"><span className="text-xs font-mono text-blue-500 uppercase tracking-widest">/ {t.groups[group.key]}</span><div className="h-[1px] flex-grow bg-white/10"></div></div>
+                        <div>{group.projects.map((project, index) => { const currentIndex = globalIndexCounter++; return (<ProjectListItem key={project.id} project={project} index={index} displayIndex={currentIndex + 1} lang={lang} setHoveredProject={setHoveredProject} openProject={setSelectedProject} />); })}</div>
+                    </div>
+                ))}
+              </section>
+
+              <section id="about" className="py-20 md:py-32 px-6 md:px-12 border-t border-white/10 relative z-10">
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-12">
+                    <div className="md:col-span-4"><h2 className="text-sm font-bold uppercase text-gray-400 tracking-widest mb-6 md:mb-8">{t.sections.about_me}</h2><div className="w-16 md:w-24 h-1 bg-white mb-6 md:mb-8" /></div>
+                    <div className="md:col-span-8">
+                        <p className="text-xl md:text-3xl font-normal leading-relaxed mb-12 md:mb-20 text-gray-200">{t.about_text}</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                            <div><h3 className="text-sm font-bold uppercase text-gray-400 mb-6">{t.sections.trajectory}</h3><ul className="space-y-6">{experienceData.map((exp, i) => (<li key={i} className="flex flex-col pb-6 border-b border-white/10"><span className="text-lg md:text-xl font-bold text-white">{exp.role[lang]}</span><span className="text-gray-300 text-sm md:text-base mt-1">{exp.company[lang]}</span><span className="text-gray-400 text-sm font-medium mt-1">{exp.period}</span></li>))}</ul></div>
+                            {/* REPLACED Services with Education */}
+                            <div>
+                                <h3 className="text-sm font-bold uppercase text-gray-400 mb-6">{translations[lang].sections.education}</h3>
+                                <ul className="space-y-6">
+                                    {educationData.map((edu, i) => (
+                                        <li key={i} className="flex flex-col pb-6 border-b border-white/10">
+                                            <span className="text-lg md:text-xl font-bold text-white">{edu.school[lang]}</span>
+                                            <span className="text-gray-300 text-sm md:text-base mt-1">{edu.degree[lang]}</span>
+                                            <span className="text-gray-400 text-sm font-medium mt-1">{edu.period} • {edu.gpa}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </section>
+
+              <section id="contact" className="min-h-[40vh] md:min-h-[50vh] flex flex-col justify-between px-6 md:px-12 py-12 border-t border-white/10 relative z-10">
+                 <div className="mb-12 md:mb-0"><h2 className="text-sm font-bold uppercase text-gray-400 tracking-widest mb-4">{t.nav.contact}</h2><a href="mailto:brucechen012@gmail.com" className="text-4xl md:text-7xl font-bold tracking-tight hover:text-gray-300 transition-colors interactive break-all md:break-normal">LET'S TALK</a></div>
+                 <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-8 relative z-10">
+                     <div className="flex gap-6 font-sans text-sm font-bold text-gray-300"><a href="https://www.linkedin.com/in/fei-chen-6896a6b0/" className="hover:text-white interactive">LinkedIn</a></div>
+                     <div className="text-left md:text-right"><p className="text-sm text-gray-400 font-medium">Frisco, TX • CST</p><p className="text-sm text-gray-400 font-medium mt-1">© 2026 {t.footer.rights}</p></div>
+                 </div>
+              </section>
+            </div>
+          );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
