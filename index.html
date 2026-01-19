@@ -22,18 +22,13 @@
     </script>
 
     <style>
-        /* Custom Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #050505; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #555; }
-        
-        /* Hide cursor on non-touch devices to use custom cursor */
         @media (pointer: fine) {
             body { cursor: none; }
             a, button, .interactive { cursor: none !important; }
-            .cursor-auto { cursor: auto !important; }
-            .cursor-auto button { cursor: pointer !important; }
         }
     </style>
 </head>
@@ -47,11 +42,10 @@
         import { motion, useScroll, useTransform, useSpring, useMotionValue, AnimatePresence } from 'framer-motion';
         import { ArrowRight, ArrowUpRight, ArrowLeft, X, Send, MessageSquare, Image as ImageIcon, CheckCircle2, Clock, AlertCircle, TrendingUp, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react';
 
-        /* --- 1. DATA DEFINITIONS --- */
-        
+        /* --- DATA --- */
         const translations = {
           en: {
-            nav: { work: "Work", about: "About", contact: "Contact", talk: "Let's Talk", back: "Back Home" },
+            nav: { work: "Work", about: "About", contact: "Contact", back: "Back Home" },
             hero: { title_line1: "DIGITAL", title_line2: "ARCHITECT", desc: "Designing how people move, decide, and act within systems.", scroll: "Scroll to Explore" },
             sections: { selected: "Selected Works", about_me: "About Me", trajectory: "Experience", education: "Education", concept: "The Concept" },
             about_text: "Space is not just a container for life, but an active participant. Transitioning from Interior Design to UX/UI, I construct 'digital architectures'—structures that are as functional as they are beautiful.",
@@ -60,7 +54,7 @@
             groups: { digital: "Digital Systems", spatial: "Spatial Systems", visual: "Visual Exploration" }
           },
           zh: {
-            nav: { work: "作品", about: "关于", contact: "联系", talk: "开始对话", back: "返回" },
+            nav: { work: "作品", about: "关于", contact: "联系", back: "返回" },
             hero: { title_line1: "数字", title_line2: "建筑师", desc: "设计人们如何在系统中移动、决策与行动。", scroll: "滑动探索" },
             sections: { selected: "精选作品", about_me: "关于我", trajectory: "工作经历", education: "教育背景", concept: "设计理念" },
             about_text: "空间不仅仅是生活的容器，更是体验的参与者。从室内设计到 UX/UI，我致力于构建“数字建筑”——既具功能性又具美感的结构。",
@@ -82,7 +76,7 @@
           { school: { en: "Hubei University of Technology", zh: "湖北工业大学" }, degree: { en: "Exhibition Design, Bachelor of Arts", zh: "会展设计学士" }, period: "Sep 2007 - Jun 2011", gpa: "GPA: 3.4/4.0" }
         ];
 
-        // NOTE: Adjusted paths to "images/..." for Vercel deployment
+        /* --- ⚠️ 已恢复全部原始文案 --- */
         const projectGroups = [
           {
             key: 'digital',
@@ -101,16 +95,77 @@
                 description: { en: "Unifying a fragmented multi-platform subscription system across Apple, Google, Amazon, and Web for a large-scale camera security platform.", zh: "为大型安防监控平台统一 Apple、Google、Amazon 和 Web 端的碎片化订阅系统，重构用户权益架构。" },
                 color: "from-indigo-900/40",
                 details: [
-                    { title: { en: "Scope & Scale", zh: "范围与规模" }, content: { en: "I led the redesign of a legacy subscription system spanning Apple, Google, Amazon, and Web, used across a large-scale camera security platform.\n\nThe system sat at the intersection of:\n• Subscription monetization\n• Entitlement management\n• Legacy service coexistence\n• Cross-platform billing constraints\n\nIt was production-critical and directly impacted revenue, churn, and support cost.", zh: "我主导了跨越 Apple、Google、Amazon 和 Web 的遗留订阅系统的重构，服务于一个大规模的摄像头安防平台。\n\n该系统处于以下领域的交汇点：\n• 订阅变现\n• 权益管理\n• 旧服务共存\n• 跨平台计费约束\n\n它是生产关键型的，直接影响收入、流失率和支持成本。" }, imageSlot: { en: "public/images/case-1-2.webp", zh: "public/images/case-1-2.webp" } },
-                    { title: { en: "Signal & Validation", zh: "信号与验证" }, content: { en: "Before the redesign, multiple signals indicated the subscription system had become unsustainable:\n• Support tickets frequently referenced confusion around plan ownership and device coverage\n• Users unintentionally purchased duplicate subscriptions across platforms\n• Internal teams repeatedly escalated entitlement conflicts during upgrades and cancellations\n\nThese signals made it clear that the issue was not visual inconsistency—but systemic fragmentation that impacted both users and internal operations.", zh: "在重构之前，多个信号表明订阅系统已变得不可持续：\n• 支持工单经常提到关于计划所有权和设备覆盖范围的混淆\n• 用户无意中在不同平台上购买了重复的订阅\n• 内部团队在升级和取消过程中反复升级权益冲突\n\n这些信号表明，问题不在于视觉上的不一致，而在于影响用户和内部运营的系统性碎片化。" }, chartData: { type: 'bar', title: { en: "User Support Volume Breakdown", zh: "用户工单类型分布" }, data: [{ label: "Duplicate Billing", value: 35, percent: "35%", color: "bg-red-500" }, { label: "Coverage Confusion", value: 42, percent: "42%", color: "bg-red-500" }, { label: "Upgrade Errors", value: 15, percent: "15%", color: "bg-orange-500" }, { label: "Other", value: 8, percent: "8%", color: "bg-gray-500" }] } },
-                    { title: { en: "Problem Reality", zh: "现实困境" }, content: { en: "Over time, different teams independently introduced new plans and rules. Users faced an inconsistent experience:\n• Per-camera subscriptions instead of account-level plans\n• Duplicate subscriptions across platforms\n• Overlapping services\n\nWhat users experienced as 'confusing UX' was rooted in deeper structural fragmentation.", zh: "随着时间推移，不同团队独立引入了新计划和规则。用户面临着不一致的体验：\n• 基于摄像头的订阅而非账户级计划\n• 跨平台重复订阅\n• 服务重叠\n\n用户体验到的“混乱 UX”根源在于更深层的结构碎片化。" }, imageSlot: { en: "public/images/case-1-3.webp", zh: "public/images/case-1-3.webp" } },
-                    { title: { en: "Complexity Proof", zh: "复杂性验证" }, content: { en: "This problem could not be solved by redesigning a single screen. Key constraints included:\n• Legacy plans that could not be removed\n• Platform-specific billing rules\n• Conflicting requirements across PM, billing, and cloud teams\n\nThe system needed to continue operating during the transition, making backward compatibility non-negotiable.", zh: "这个问题无法通过重新设计单个屏幕来解决。关键约束包括：\n• 无法移除的遗留计划\n• 平台特定的计费规则\n• 跨 PM、计费和云团队的冲突需求\n\n系统需要在过渡期间继续运行，因此向后兼容性是不可妥协的。" }, imageSlot: { en: "public/images/case-1-4.webp", zh: "public/images/case-1-4.webp" } },
-                    { title: { en: "Design Approach", zh: "设计方法" }, content: { en: "Before designing UI, I focused on stabilizing the system logic. I worked closely with engineering teams to map existing entitlements, define coexistence rules, and establish predictable upgrade guarantees. This architectural clarity became the foundation for all subsequent design decisions.", zh: "在设计 UI 之前，我专注于稳定系统逻辑。我与工程团队紧密合作，映射现有权益，定义共存规则，并建立可预测的升级保证。这种架构上的清晰度成为了所有后续设计决策的基础。" }, imageSlot: { en: "public/images/case-1-5.webp", zh: "public/images/case-1-5.webp" } },
-                    { title: { en: "System Restructure", zh: "系统重构" }, content: { en: "We transitioned from a fragmented, license-driven model to a clear tier-based system:\n• T1 (Per-camera)\n• T2 (Unlimited)\n• T3 (AI protection)\n\nLegacy plans were preserved under the hood but abstracted away. The system now expressed a single, consistent mental model regardless of platform source.", zh: "我们从碎片化的许可证驱动模型转变为清晰的分层系统：\n• T1（单摄）\n• T2（无限）\n• T3（AI 保护）\n\n遗留计划在底层得以保留但对用户抽象化。无论平台来源如何，系统现在都表达了一个单一、一致的心智模型。" }, imageSlot: { en: "public/images/case-1-6.webp", zh: "public/images/case-1-6.webp" } },
-                    { title: { en: "Solution Evidence", zh: "解决方案" }, content: { en: "With the new model, the UI reflected clarity. Key changes included:\n• Aggregated service cards\n• Clear plan ownership\n• Simplified management without exposing mechanics\n• Predictable upgrade paths\n\nUsers no longer needed to reason about entitlements.", zh: "有了新模型，UI 终于反映出了清晰度。关键变化包括：\n• 聚合服务卡片\n• 清晰的计划所有权\n• 不暴露机制的简化管理\n• 可预测的升级路径\n\n用户不再需要推理解读权益逻辑。" }, imageSlot: { en: "public/images/case-1-7.webp", zh: "public/images/case-1-7.webp" } },
-                    { title: { en: "Impact", zh: "影响力" }, content: { en: "Reduced confusion around ownership, fewer duplicate subscriptions, clearer upgrade paths, and lower support volume related to entitlement issues. The system became more operable for both users and internal teams.", zh: "减少了关于所有权的困惑，减少了重复订阅，升级路径更清晰，权益相关问题的支持量降低。系统对于用户和内部团队都变得更具可操作性。" }, impactGrid: [{ type: 'trend', title: { en: "Support Volume", zh: "支持工单量" }, value: "-45%", trend: "down", labels: { start: "Pre-Launch", end: "Post-Launch" }, icon: AlertCircle }, { type: 'bar', title: { en: "Duplicate Subs", zh: "重复订阅数" }, icon: CheckCircle2, data: [{ label: "Before", value: "High", percent: "80%", color: "bg-red-500/50" }, { label: "After", value: "Low", percent: "20%", color: "bg-green-500" }] }, { type: 'trend', title: { en: "Upgrade Conv.", zh: "升级转化率" }, value: "+25%", trend: "up", labels: { start: "Q1", end: "Q4" }, icon: TrendingUp }, { type: 'bar', title: { en: "Debug Time/Wk", zh: "周调试时间" }, icon: Clock, data: [{ label: "Legacy", value: "20h", percent: "90%", color: "bg-gray-500" }, { label: "New", value: "2h", percent: "15%", color: "bg-blue-500" }] }] },
-                    { title: { en: "Design Judgment", zh: "设计判断" }, content: { en: "The most critical decisions weren’t visual. They were about which system complexity must remain invisible, which constraints must be surfaced, and how much control users actually need. Balancing these trade-offs is where product design becomes system design.", zh: "最关键的决策不是视觉上的。而是关于哪些系统复杂性必须保持不可见，哪些约束必须浮出水面，以及用户实际上需要多少控制权。平衡这些权衡是产品设计转化为系统设计的地方。" } }
-                    { title: { en: "Designer Positioning", zh: "设计师定位" }, content: { en: "I specialize in designing subscription systems, cross-platform experiences, and workflows constrained by real production requirements. My strength is turning fragmented, high-risk systems into clear, scalable product experiences.", zh: "我专注于设计订阅系统、跨平台体验以及受实际生产要求约束的工作流。我的强项是将碎片化、高风险的系统转化为清晰、可扩展的产品体验。" } }
+                    { 
+                        title: { en: "Scope & Scale", zh: "范围与规模" }, 
+                        content: { 
+                            en: "I led the redesign of a legacy subscription system spanning Apple, Google, Amazon, and Web, used across a large-scale camera security platform.\n\nThe system sat at the intersection of:\n• Subscription monetization\n• Entitlement management\n• Legacy service coexistence\n• Cross-platform billing constraints\n\nIt was production-critical and directly impacted revenue, churn, and support cost.",
+                            zh: "我主导了跨越 Apple、Google、Amazon 和 Web 的遗留订阅系统的重构，服务于一个大规模的摄像头安防平台。\n\n该系统处于以下领域的交汇点：\n• 订阅变现\n• 权益管理\n• 旧服务共存\n• 跨平台计费约束\n\n它是生产关键型的，直接影响收入、流失率和支持成本。"
+                        }, 
+                        imageSlot: { en: "public/images/case-1-2.webp", zh: "public/images/case-1-2.webp" } 
+                    },
+                    { 
+                        title: { en: "Signal & Validation", zh: "信号与验证" }, 
+                        content: {
+                            en: "Before the redesign, multiple signals indicated the subscription system had become unsustainable:\n• Support tickets frequently referenced confusion around plan ownership and device coverage\n• Users unintentionally purchased duplicate subscriptions across platforms\n• Internal teams repeatedly escalated entitlement conflicts during upgrades and cancellations\n\nThese signals made it clear that the issue was not visual inconsistency—but systemic fragmentation that impacted both users and internal operations.",
+                            zh: "在重构之前，多个信号表明订阅系统已变得不可持续：\n• 支持工单经常提到关于计划所有权和设备覆盖范围的混淆\n• 用户无意中在不同平台上购买了重复的订阅\n• 内部团队在升级和取消过程中反复升级权益冲突\n\n这些信号表明，问题不在于视觉上的不一致，而在于影响用户和内部运营的系统性碎片化。"
+                        },
+                        chartData: { type: 'bar', title: { en: "User Support Volume Breakdown", zh: "用户工单类型分布" }, data: [{ label: "Duplicate Billing", value: 35, percent: "35%", color: "bg-red-500" }, { label: "Coverage Confusion", value: 42, percent: "42%", color: "bg-red-500" }, { label: "Upgrade Errors", value: 15, percent: "15%", color: "bg-orange-500" }, { label: "Other", value: 8, percent: "8%", color: "bg-gray-500" }] } 
+                    },
+                    { 
+                        title: { en: "Problem Reality", zh: "现实困境" }, 
+                        content: {
+                            en: "Over time, different teams independently introduced new plans and rules. Users faced an inconsistent experience:\n• Per-camera subscriptions instead of account-level plans\n• Duplicate subscriptions across platforms\n• Overlapping services\n\nWhat users experienced as 'confusing UX' was rooted in deeper structural fragmentation.",
+                            zh: "随着时间推移，不同团队独立引入了新计划和规则。用户面临着不一致的体验：\n• 基于摄像头的订阅而非账户级计划\n• 跨平台重复订阅\n• 服务重叠\n\n用户体验到的“混乱 UX”根源在于更深层的结构碎片化。"
+                        },
+                        imageSlot: { en: "public/images/case-1-3.webp", zh: "public/images/case-1-3.webp" } 
+                    },
+                    { 
+                        title: { en: "Complexity Proof", zh: "复杂性验证" }, 
+                        content: {
+                            en: "This problem could not be solved by redesigning a single screen. Key constraints included:\n• Legacy plans that could not be removed\n• Platform-specific billing rules\n• Conflicting requirements across PM, billing, and cloud teams\n\nThe system needed to continue operating during the transition, making backward compatibility non-negotiable.",
+                            zh: "这个问题无法通过重新设计单个屏幕来解决。关键约束包括：\n• 无法移除的遗留计划\n• 平台特定的计费规则\n• 跨 PM、计费和云团队的冲突需求\n\n系统需要在过渡期间继续运行，因此向后兼容性是不可妥协的。"
+                        },
+                        imageSlot: { en: "public/images/case-1-4.webp", zh: "public/images/case-1-4.webp" } 
+                    },
+                    { 
+                        title: { en: "Design Approach", zh: "设计方法" }, 
+                        content: {
+                            en: "Before designing UI, I focused on stabilizing the system logic. I worked closely with engineering teams to map existing entitlements, define coexistence rules, and establish predictable upgrade guarantees. This architectural clarity became the foundation for all subsequent design decisions.",
+                            zh: "在设计 UI 之前，我专注于稳定系统逻辑。我与工程团队紧密合作，映射现有权益，定义共存规则，并建立可预测的升级保证。这种架构上的清晰度成为了所有后续设计决策的基础。"
+                        },
+                        imageSlot: { en: "public/images/case-1-5.webp", zh: "public/images/case-1-5.webp" } 
+                    },
+                    { 
+                        title: { en: "System Restructure", zh: "系统重构" }, 
+                        content: {
+                            en: "We transitioned from a fragmented, license-driven model to a clear tier-based system:\n• T1 (Per-camera)\n• T2 (Unlimited)\n• T3 (AI protection)\n\nLegacy plans were preserved under the hood but abstracted away. The system now expressed a single, consistent mental model regardless of platform source.",
+                            zh: "我们从碎片化的许可证驱动模型转变为清晰的分层系统：\n• T1（单摄）\n• T2（无限）\n• T3（AI 保护）\n\n遗留计划在底层得以保留但对用户抽象化。无论平台来源如何，系统现在都表达了一个单一、一致的心智模型。"
+                        },
+                        imageSlot: { en: "public/images/case-1-6.webp", zh: "public/images/case-1-6.webp" } 
+                    },
+                    { 
+                        title: { en: "Solution Evidence", zh: "解决方案" }, 
+                        content: {
+                            en: "With the new model, the UI reflected clarity. Key changes included:\n• Aggregated service cards\n• Clear plan ownership\n• Simplified management without exposing mechanics\n• Predictable upgrade paths\n\nUsers no longer needed to reason about entitlements.",
+                            zh: "有了新模型，UI 终于反映出了清晰度。关键变化包括：\n• 聚合服务卡片\n• 清晰的计划所有权\n• 不暴露机制的简化管理\n• 可预测的升级路径\n\n用户不再需要推理解读权益逻辑。"
+                        },
+                        imageSlot: { en: "public/images/case-1-7.webp", zh: "public/images/case-1-7.webp" } 
+                    },
+                    { 
+                        title: { en: "Impact", zh: "影响力" }, 
+                        content: {
+                            en: "Reduced confusion around ownership, fewer duplicate subscriptions, clearer upgrade paths, and lower support volume related to entitlement issues. The system became more operable for both users and internal teams.",
+                            zh: "减少了关于所有权的困惑，减少了重复订阅，升级路径更清晰，权益相关问题的支持量降低。系统对于用户和内部团队都变得更具可操作性。"
+                        },
+                        impactGrid: [{ type: 'trend', title: { en: "Support Volume", zh: "支持工单量" }, value: "-45%", trend: "down", labels: { start: "Pre-Launch", end: "Post-Launch" }, icon: AlertCircle }, { type: 'bar', title: { en: "Duplicate Subs", zh: "重复订阅数" }, icon: CheckCircle2, data: [{ label: "Before", value: "High", percent: "80%", color: "bg-red-500/50" }, { label: "After", value: "Low", percent: "20%", color: "bg-green-500" }] }, { type: 'trend', title: { en: "Upgrade Conv.", zh: "升级转化率" }, value: "+25%", trend: "up", labels: { start: "Q1", end: "Q4" }, icon: TrendingUp }, { type: 'bar', title: { en: "Debug Time/Wk", zh: "周调试时间" }, icon: Clock, data: [{ label: "Legacy", value: "20h", percent: "90%", color: "bg-gray-500" }, { label: "New", value: "2h", percent: "15%", color: "bg-blue-500" }] }] 
+                    },
+                    { 
+                        title: { en: "Designer Positioning", zh: "设计师定位" }, 
+                        content: {
+                            en: "I specialize in designing subscription systems, cross-platform experiences, and workflows constrained by real production requirements. My strength is turning fragmented, high-risk systems into clear, scalable product experiences.",
+                            zh: "我专注于设计订阅系统、跨平台体验以及受实际生产要求约束的工作流。我的强项是将碎片化、高风险的系统转化为清晰、可扩展的产品体验。"
+                        }
+                    }
                 ]
                },
                {
@@ -127,13 +182,62 @@
                 description: { en: "Transforming In-App Purchase from Static Paywalls into a State-Aware System.", zh: "将应用内购买从静态付费墙转变为状态感知系统。" },
                 color: "from-blue-900/40",
                 details: [
-                    { title: { en: "Scope & Scale", zh: "范围与规模" }, content: { en: "I led the redesign of the in-app purchase (IAP) system...", zh: "我主导了 IAP 系统重构..." }, imageSlot: { en: "public/images/case-2-2.webp", zh: "public/images/case-2-2.webp" } },
-                    { title: { en: "Problem Reality", zh: "现实困境" }, content: { en: "The original IAP experience treated purchase as a single isolated moment...", zh: "原有的 IAP 体验将购买视为单一孤立时刻..." }, imageSlot: { en: "public/images/case-2-3.webp", zh: "public/images/case-2-3.webp" } },
-                    { title: { en: "Complexity Proof", zh: "复杂性验证" }, content: { en: "This was not a UI-level problem...", zh: "这不是一个 UI 层面的问题..." }, imageSlot: { en: "public/images/case-2-4.webp", zh: "public/images/case-2-4.webp" } },
-                    { title: { en: "Design Approach", zh: "设计方法" }, content: { en: "Before redesigning screens, I focused on system behavior...", zh: "在重新设计屏幕之前，我专注于系统行为..." }, imageSlot: { en: "public/images/case-2-5.webp", zh: "public/images/case-2-5.webp" } },
-                    { title: { en: "System Restructure", zh: "系统重构" }, content: { en: "For Camera-unbound Entry Points, the redesigned flow keeps the paywall consistent...", zh: "对于非特定摄像头的入口，重设计的流程保持付费墙一致..." }, imageSlot: { en: "public/images/case-2-6.webp", zh: "public/images/case-2-6.webp" } },
-                    { title: { en: "Camera-Bound Adaptation", zh: "特定摄像头的适配" }, content: { en: "In contexts like Camera Onboarding...", zh: "在摄像头引导或事件详情等场景中..." }, imageGrid: [{ en: "public/images/case-2-7.webp", zh: "public/images/case-2-7.webp" }, { en: "public/images/case-2-8.webp", zh: "public/images/case-2-8.webp" }, { en: "images/case-2-9.webp", zh: "images/case-2-9.webp" }] },
-                    { title: { en: "Impact", zh: "影响力" }, content: { en: "After rollout, we observed strong directional outcomes...", zh: "上线后，我们观察到了强劲的正向结果..." }, impactGrid: [{ type: 'trend', title: { en: "Drop-off Rate", zh: "流失率" }, value: "-35%", trend: "down", labels: { start: "Legacy", end: "New" }, icon: AlertCircle }, { type: 'bar', title: { en: "Setup Completion", zh: "设置完成率" }, icon: CheckCircle2, data: [{ label: "Old", value: "65%", percent: "65%", color: "bg-gray-500" }, { label: "New", value: "92%", percent: "92%", color: "bg-green-500" }] }] }
+                    { 
+                        title: { en: "Scope & Scale", zh: "范围与规模" }, 
+                        content: {
+                            en: "I led the redesign of the in-app purchase (IAP) system for a camera security app used across multiple product surfaces. Unlike a single conversion flow, IAP appeared in high-frequency and high-impact moments, including:\n• Service browsing\n• Camera onboarding\n• Camera feature management\n• Event review\n\nThe system needed to support multiple subscription tiers, different ownership states, and real-time decision-making. IAP was no longer just a revenue surface—it had become a core system dependency.",
+                            zh: "我主导了一款多端使用的安防摄像头 App 的应用内购买（IAP）系统重构。不同于单一的转化流程，IAP 出现在高频且高影响力的时刻，包括：\n• 服务浏览\n• 摄像头引导设置\n• 功能管理\n• 事件回看\n\n系统需要支持多种订阅层级、不同的所有权状态以及基于用户上下文的实时决策。IAP 不再仅仅是收入界面，而是成为了核心系统依赖。"
+                        },
+                        imageSlot: { en: "public/images/case-2-2.webp", zh: "public/images/case-2-2.webp" } 
+                    },
+                    { 
+                        title: { en: "Problem Reality", zh: "现实困境" }, 
+                        content: {
+                            en: "The original IAP experience treated purchase as a single, isolated moment. In practice, users entered IAP with very different intents:\n• Exploring plans\n• Finishing setup\n• Unlocking a feature\n\nHowever, the system responded with the same behavior every time. This resulted in unnecessary plan comparisons during onboarding, redundant prompts for subscribers, and confusion between 'adding a feature' vs 'buying a plan'. What looked like a conversion problem was rooted in a workflow mismatch.",
+                            zh: "原有的 IAP 体验将购买视为一个单一、孤立的时刻。实际上，用户带着截然不同的意图进入 IAP：\n• 探索计划\n• 完成设置\n• 解锁特定功能\n\n然而，系统每次都以相同的行为响应。这导致了引导过程中不必要的计划比较、对现有订阅者的冗余提示，以及“增加功能”与“购买计划”之间的混淆。表面上的转化率问题，根源在于工作流与用户意图的不匹配。"
+                        },
+                        imageSlot: { en: "public/images/case-2-3.webp", zh: "public/images/case-2-3.webp" } 
+                    },
+                    { 
+                        title: { en: "Complexity Proof", zh: "复杂性验证" }, 
+                        content: {
+                            en: "This was not a UI-level problem. Key constraints included:\n• Different entry points with different user intent\n• Camera-level vs account-level subscription logic\n• License availability and attachment rules\n• The need to support future tiers without rebuilding flows\n\nA single static paywall could not scale across these scenarios without breaking user trust.",
+                            zh: "这不是一个 UI层面的问题。关键约束包括：\n• 具有不同用户意图的多个入口\n• 摄像头级与账户级订阅逻辑的区别\n• 许可证可用性与绑定规则\n• 在不重建流程的情况下支持未来层级的需求\n\n单一的静态付费墙无法在不破坏用户信任的情况下扩展到这些场景。"
+                        },
+                        imageSlot: { en: "public/images/case-2-4.webp", zh: "public/images/case-2-4.webp" } 
+                    },
+                    { 
+                        title: { en: "Design Approach", zh: "设计方法" }, 
+                        content: {
+                            en: "Before redesigning screens, I focused on system behavior.\n\nEarly usability testing and validation experiments revealed that user intent varied significantly depending on where IAP was encountered. Treating all entry points as a single flow was masking these differences and creating unnecessary friction.\n\nWorking closely with PM and engineering, and informed by observed user behavior across multiple IAP contexts, I reframed the problem around a single question: What does the system already know about this user at the moment they encounter IAP?\n\nThis led to a key architectural distinction:\n• Camera-unbound entry points (no specific camera is associated at the moment of purchase)\n• Camera-bound entry points (the system knows exactly which camera is involved)\n\nThis distinction became the foundation for a state-aware IAP system.",
+                            zh: "在重新设计屏幕之前，我专注于系统行为。\n\n早期的可用性测试和验证实验表明，用户意图因遇到 IAP 的位置而异。将所有入口点视为单一流程掩盖了这些差异，并造成了不必要的摩擦。\n\n通过与产品经理和工程团队紧密合作，并基于在多个 IAP 场景中观察到的用户行为，我围绕一个问题重新构建了这个问题：当用户遇到 IAP 时，系统已经知道了关于该用户的什么信息？\n\n这引出了一个关键的架构区分：\n• 与特定设备无关的入口点（购买时刻未关联特定摄像机）\n• 特定于摄像头的入口点（系统确切知道涉及哪台摄像机）\n\n这一区分成为了状态感知 IAP 系统的基础。"
+                        },
+                        imageSlot: { en: "public/images/case-2-5.webp", zh: "public/images/case-2-5.webp" } 
+                    },
+                    { 
+                        title: { en: "System Restructure", zh: "系统重构" }, 
+                        content: {
+                            en: "For Camera-unbound Entry Points (Home, Account), the redesigned flow keeps the paywall consistent but adapts the workflow based on camera count. For Camera-bound Entry Points (Onboarding, Settings), the system focuses on task completion. Behavior adapts based on user state:\n• Free users get value framing\n• Licensed users get immediate attachment\n• Unlicensed users get minimal purchase flow",
+                            zh: "对于非特定摄像头的入口（首页、账户），重设计的流程保持付费墙一致，但根据摄像头数量调整工作流。对于特定摄像头的入口（引导、设置），系统专注于任务完成。行为根据用户状态调整：\n• 免费用户看到价值引导\n• 有许可证用户直接绑定\n• 无许可证用户进入极简购买流程"
+                        },
+                        imageSlot: { en: "public/images/case-2-6.webp", zh: "public/images/case-2-6.webp" } 
+                    },
+                    { 
+                        title: { en: "Camera-Bound Adaptation", zh: "特定摄像头的适配" }, 
+                        content: {
+                            en: "In contexts like Camera Onboarding or Event Detail, the system already knows which camera the user is acting on. Instead of plan comparison, the system focuses on task completion.\n• Free users see clear value framing tied to the task.\n• Subscribed users with licenses get immediate attachment.\n• Subscribed users without licenses see a minimal, transparent purchase flow.",
+                            zh: "在摄像头引导或事件详情等场景中，系统已经知道用户正在操作哪台摄像头。系统专注于任务完成，而非计划比较。\n• 免费用户看到与任务相关的清晰价值引导。\n• 有许可证的订阅用户获得即时绑定。\n• 无许可证的订阅用户看到极简透明的购买流程。"
+                        },
+                        imageGrid: [{ en: "public/images/case-2-7.webp", zh: "public/images/case-2-7.webp" }, { en: "public/images/case-2-8.webp", zh: "public/images/case-2-8.webp" }, { en: "public/images/case-2-9.webp", zh: "public/images/case-2-9.webp" }] 
+                    },
+                    { 
+                        title: { en: "Impact", zh: "影响力" }, 
+                        content: {
+                            en: "After rollout, we observed strong directional outcomes:\n• Fewer unnecessary purchase interruptions\n• Clearer upgrade and attachment paths\n• Improved user confidence during onboarding\n• Reduced internal debugging of subscription states\n\nIAP evolved from a brittle UI pattern into a reliable product system.",
+                            zh: "上线后，我们观察到了强劲的正向结果：\n• 不必要的购买打断减少\n• 升级和绑定路径更清晰\n• 引导期间用户信心提升\n• 内部调试订阅状态的时间减少\n\nIAP 从脆弱的 UI 模式进化为可靠的产品系统。"
+                        },
+                        impactGrid: [{ type: 'trend', title: { en: "Drop-off Rate", zh: "流失率" }, value: "-35%", trend: "down", labels: { start: "Legacy", end: "New" }, icon: AlertCircle }, { type: 'bar', title: { en: "Setup Completion", zh: "设置完成率" }, icon: CheckCircle2, data: [{ label: "Old", value: "65%", percent: "65%", color: "bg-gray-500" }, { label: "New", value: "92%", percent: "92%", color: "bg-green-500" }] }] 
+                    }
                 ]
                },
                {
@@ -147,13 +251,41 @@
                 duration: { en: "~2 Months", zh: "~2 个月" },
                 heroImage: "public/images/case-3-1.webp",
                 focus: { en: ["· AI-assisted Discovery", "· Workflow Acceleration"], zh: ["· AI 辅助发现", "· 工作流加速"] },
-                description: { en: "Accelerating event discovery in high-volume camera systems.", zh: "加速海量摄像机系统中的事件发现。" },
+                description: { en: "Accelerating event discovery in high-volume camera systems to reduce time and effort while preserving user trust.", zh: "加速海量摄像机系统中的事件发现，在保持用户信任的同时减少时间和精力消耗。" },
                 color: "from-purple-900/40", 
                 details: [
-                    { title: { en: "Scope & Context", zh: "范围与背景" }, content: { en: "As camera adoption scales, users generate an increasing volume of recorded events...", zh: "随着摄像机普及率的提高，用户生成的录制事件量不断增加..." }, imageSlot: { en: "public/images/case-3-2.webp", zh: "public/images/case-3-2.webp" } },
-                    { title: { en: "Complexity Beneath the Surface", zh: "表面之下的复杂性" }, content: { en: "This was not a simple search UI problem...", zh: "这不是一个简单的搜索 UI 问题..." }, imageSlot: { en: "public/images/case-3-3.webp", zh: "public/images/case-3-3.webp" } },
-                    { title: { en: "Solution — Video Search Experience", zh: "解决方案 — 视频搜索体验" }, content: { en: "Key behaviors: One-tap entry via the Video Search icon...", zh: "关键行为：通过视频搜索图标一键进入..." }, imageSlot: { en: "public/images/case-3-4.webp", zh: "public/images/case-3-4.webp" } },
-                    { title: { en: "Search Recovery", zh: "搜索恢复" }, content: { en: "Video Search accelerates precision—but it does not trap users...", zh: "视频搜索加速了精确度——但它不会困住用户..." }, imageSlot: { en: "public/images/case-3-5.webp", zh: "public/images/case-3-5.webp" } }
+                    { 
+                        title: { en: "Scope & Context", zh: "范围与背景" }, 
+                        content: {
+                            en: "As camera adoption scales, users generate an increasing volume of recorded events across multiple devices. This project focused on how users locate a specific moment—not how events are captured. The goal of Video Search was to reduce the time and effort required to find meaningful events, while preserving existing workflows users already trust.",
+                            zh: "随着摄像机普及率的提高，用户在多个设备上生成的录制事件量不断增加。本项目关注用户如何定位特定时刻——而非事件如何被捕捉。视频搜索的目标是减少寻找有意义事件所需的时间和精力，同时保留用户已信任的现有工作流。"
+                        },
+                        imageSlot: { en: "public/images/case-3-2.webp", zh: "public/images/case-3-2.webp" } 
+                    },
+                    { 
+                        title: { en: "Complexity Beneath the Surface", zh: "表面之下的复杂性" }, 
+                        content: {
+                            en: "This was not a simple search UI problem. Key constraints included:\n• Large, unstructured video datasets\n• Existing discovery workflows that could not be removed\n• Varying relevance in AI results\n• The need to preserve user trust\n\nVideo Search needed to accelerate discovery without breaking task continuity.",
+                            zh: "这不是一个简单的搜索 UI 问题。关键约束包括：\n• 庞大的非结构化视频数据集\n• 无法移除的现有发现工作流\n• AI 结果的相关性差异\n• 保持用户信任的需求\n\n视频搜索需要在不破坏任务连续性的前提下加速发现。"
+                        },
+                        imageSlot: { en: "public/images/case-3-3.webp", zh: "public/images/case-3-3.webp" } 
+                    },
+                    { 
+                        title: { en: "Solution — Video Search Experience", zh: "解决方案 — 视频搜索体验" }, 
+                        content: {
+                            en: "Key behaviors:\n• One-tap entry via the Video Search icon\n• Natural language input (e.g., 'dog in backyard')\n• Results returned within familiar event structures\n• Relevance-based ordering without removing filters\n\nThe experience emphasizes speed without mystery—users always understand what they are seeing and why.",
+                            zh: "关键行为：\n• 通过视频搜索图标一键进入\n• 自然语言输入（例如“后院的狗”）\n• 在熟悉的事件结构中返回结果\n• 基于相关性排序而不移除筛选器\n\n这种体验强调速度而非神秘感——用户始终明白他们看到了什么以及原因。"
+                        },
+                        imageSlot: { en: "public/images/case-3-4.webp", zh: "public/images/case-3-4.webp" } 
+                    },
+                    { 
+                        title: { en: "Search Recovery", zh: "搜索恢复" }, 
+                        content: {
+                            en: "Video Search accelerates precision—but it does not trap users. When users don’t immediately find the event they want:\n• They remain within the event browsing context\n• Existing filters (camera, person, pet) stay accessible\n• Continue manual exploration without restarting the task\n\nThis ensures Video Search never becomes a dead end. Instead of forcing users to trust AI results blindly, the system keeps manual control always within reach.",
+                            zh: "视频搜索加速了精确度——但它不会困住用户。当用户没有立即找到想要的事件时：\n• 他们仍然处于事件浏览上下文中\n• 现有筛选器（摄像头、人员、宠物）保持可用\n• 继续手动探索而无需重启任务\n\n这确保了视频搜索永远不会成为死胡同。系统不强迫用户盲目信任 AI 结果，而是始终将手动控制权保留在触手可及之处。"
+                        },
+                        imageSlot: { en: "public/images/case-3-5.webp", zh: "public/images/case-3-5.webp" } 
+                    }
                 ]
                }
             ]
@@ -173,9 +305,30 @@
                 description: { en: "Bookstore concept in Hyde Park. Nature-integrated reading experience.", zh: "海德公园书店概念。自然融合的阅读体验。" },
                 color: "from-green-900/40",
                 details: [
-                    { title: { en: "Project Context", zh: "项目背景" }, content: { en: "GREEN BOOK is a conceptual interior design project focused on system design...", zh: "GREEN BOOK 是一个专注于系统设计而非形式创造的概念室内设计项目..." }, imageSlot: { en: "public/images/case-4-2.webp", zh: "public/images/case-4-2.webp" } },
-                    { title: { en: "System Thinking Approach", zh: "系统思维方法" }, content: { en: "The project began by abstracting spatial design into a rule-based system...", zh: "该项目始于将空间设计抽象为基于规则的系统..." }, imageSlot: { en: "public/images/case-4-3.webp", zh: "public/images/case-4-3.webp" } },
-                    { title: { en: "Outcome", zh: "成果" }, content: { en: "The final outcome was not a single fixed space, but a repeatable spatial logic...", zh: "最终成果不是单一的固定空间，而是一套可重复的空间逻辑..." }, imageSlot: { en: "public/images/case-4-4.webp", zh: "public/images/case-4-4.webp" } }
+                    { 
+                        title: { en: "Project Context", zh: "项目背景" }, 
+                        content: {
+                            en: "GREEN BOOK is a conceptual interior design project focused on system design rather than form-making. Instead of treating space as a static composition, this project explores how a set of abstract rules can generate consistent and scalable spatial outcomes—similar to how design systems govern digital products. The objective was not to design a single space, but to define a framework capable of producing multiple coherent spatial configurations.",
+                            zh: "GREEN BOOK 是一个专注于系统设计而非形式创造的概念室内设计项目。该项目不将空间视为静态的组合，而是探索了一套抽象规则如何生成一致且可扩展的空间结果——类似于设计系统如何管理数字产品。目标不是设计单一空间，而是定义一个能够产生多种连贯空间配置的框架。"
+                        },
+                        imageSlot: { en: "public/images/case-4-2.webp", zh: "public/images/case-4-2.webp" } 
+                    },
+                    { 
+                        title: { en: "System Thinking Approach", zh: "系统思维方法" }, 
+                        content: {
+                            en: "The project began by abstracting spatial design into a rule-based system, consisting of:\n• Core principles (hierarchy, rhythm, proportion)\n• Modular spatial units\n• Defined relationships between elements\n• Constraint-based transformations\n\nInstead of asking 'What should this look like?', the guiding question was: 'What rules must always hold true?' Once these rules were established, individual design decisions became outputs of the system rather than isolated choices.",
+                            zh: "该项目始于将空间设计抽象为基于规则的系统，包括：\n• 核心原则（层级、韵律、比例）\n• 模块化空间单元\n• 元素间定义的关系\n• 基于约束的变换\n\n指导性问题不是“它应该看起来像什么？”，而是“哪些规则必须始终成立？”一旦建立了这些规则，个体的设计决策就变成了系统的产出，而非孤立的选择。"
+                        },
+                        imageSlot: { en: "public/images/case-4-3.webp", zh: "public/images/case-4-3.webp" } 
+                    },
+                    { 
+                        title: { en: "Outcome", zh: "成果" }, 
+                        content: {
+                            en: "The final outcome was not a single fixed space, but a repeatable spatial logic capable of producing multiple valid configurations. The system demonstrated that:\n• Explicit rules reduce subjective decision fatigue\n• Constraints can enable creativity rather than limit it\n• Design quality improves when logic is visible and consistent\n\nDifferent medium. Same design philosophy.",
+                            zh: "最终成果不是单一的固定空间，而是一套可重复的空间逻辑，能够产生多种有效的配置。系统证明了：\n• 明确的规则减少了主观决策疲劳\n• 约束可以激活创造力而非限制它\n• 当逻辑可见且一致时，设计质量得以提升\n\n不同的媒介，相同的设计哲学。"
+                        },
+                        imageSlot: { en: "public/images/case-4-4.webp", zh: "public/images/case-4-4.webp" } 
+                    }
                 ]
               },
               {
@@ -190,11 +343,46 @@
                 description: { en: "Restaurant renovation blending bamboo aesthetics with structural elements.", zh: "融合竹韵美学与结构元素的餐厅改造。" },
                 color: "from-emerald-900/40",
                 details: [
-                    { title: { en: "Project Context", zh: "项目背景" }, content: { en: "IMPRESSION OF YANGTZE RIVER is a commercial interior project...", zh: "《长江印象》是一个位于现有建筑结构内的商业室内项目..." }, imageSlot: { en: "public/images/case-5-2.webp", zh: "public/images/case-5-2.webp" } },
-                    { title: { en: "Complexity Beneath the Surface", zh: "表面之下的复杂性" }, content: { en: "The complexity of the project extended beyond physical constraints...", zh: "项目的复杂性延伸到了物理约束之外..." }, imageSlot: { en: "public/images/case-5-3.webp", zh: "public/images/case-5-3.webp" } },
-                    { title: { en: "Design Approach", zh: "设计方法" }, content: { en: "Rather than treating the project as a collection of independent spaces...", zh: "与其将项目视为独立空间的集合，不如将其视为一个互联的系统..." }, imageSlot: { en: "public/images/case-5-4.webp", zh: "public/images/case-5-4.webp" } },
-                    { title: { en: "Design Execution", zh: "设计执行" }, content: { en: "With the system logic defined: Each zone was designed as part of a continuous experience...", zh: "随着系统逻辑的定义：每个区域都被设计为连续体验的一部分..." }, imageSlot: { en: "public/images/case-5-5.webp", zh: "public/images/case-5-5.webp" } },
-                    { title: { en: "Outcome", zh: "成果" }, content: { en: "The completed space delivered: A coherent spatial narrative...", zh: "完工后的空间交付了：跨越多个楼层的连贯空间叙事..." }, imageGrid: [{ en: "public/images/case-5-6.webp", zh: "public/images/case-5-6.webp" }, { en: "public/images/case-5-7.webp", zh: "public/images/case-5-7.webp" }] }
+                    { 
+                        title: { en: "Project Context", zh: "项目背景" }, 
+                        content: {
+                            en: "IMPRESSION OF YANGTZE RIVER is a commercial interior project located within an existing building structure, serving a mixed public audience. The project involved redesigning a multi-level interior space under fixed architectural conditions, predefined circulation paths, and business-driven functional requirements. Unlike conceptual work, this project required balancing:\n• Client expectations\n• Structural limitations\n• User flow\n• Cultural narrative\n\nThe challenge was to create a cohesive spatial experience without the freedom to start from scratch.",
+                            zh: "《长江印象》是一个位于现有建筑结构内的商业室内项目，服务于多元化的公众群体。该项目涉及在固定的建筑条件、预定义的动线路径和商业驱动的功能需求下，重新设计一个多层室内空间。不同于概念作品，该项目需要平衡：\n• 客户期望\n• 结构限制\n• 用户流线\n• 文化叙事\n\n挑战在于如何在没有从零开始的自由的情况下，创造连贯的空间体验。"
+                        },
+                        imageSlot: { en: "public/images/case-5-2.webp", zh: "public/images/case-5-2.webp" } 
+                    },
+                    { 
+                        title: { en: "Complexity Beneath the Surface", zh: "表面之下的复杂性" }, 
+                        content: {
+                            en: "The complexity of the project extended beyond physical constraints. Key challenges included: Aligning client vision with operational realities. Managing spatial hierarchy across multiple floors. Ensuring intuitive circulation for first-time visitors. Balancing cultural expression with functional clarity. Each design decision had to account for downstream impact— similar to making changes in a legacy digital system.",
+                            zh: "项目的复杂性延伸到了物理约束之外。关键挑战包括：将客户愿景与运营现实对齐；管理跨越多个楼层的空间层级；确保首次访客的直观动线；平衡文化表达与功能清晰度。每一个设计决策都必须考虑下游影响——类似于在遗留数字系统中进行更改。"
+                        },
+                        imageSlot: { en: "public/images/case-5-3.webp", zh: "public/images/case-5-3.webp" } 
+                    },
+                    { 
+                        title: { en: "Design Approach", zh: "设计方法" }, 
+                        content: {
+                            en: "Rather than treating the project as a collection of independent spaces, I approached it as a connected system. The design strategy focused on: Establishing a clear spatial hierarchy. Using circulation as the primary organizing logic. Letting material, light, and proportion reinforce navigation. Applying cultural references through structure and rhythm, not ornament. The goal was to allow users to understand the space intuitively, without signage-heavy guidance.",
+                            zh: "与其将项目视为独立空间的集合，不如将其视为一个互联的系统。设计策略侧重于：\n• 建立清晰的空间层级\n• 以动线作为主要的组织逻辑\n• 利用材质、光线和比例来强化导航\n• 通过结构和韵律而非装饰来应用文化参考\n\n目标是让用户直观地理解空间，而无需依赖繁杂的标识指引。"
+                        },
+                        imageSlot: { en: "public/images/case-5-4.webp", zh: "public/images/case-5-4.webp" } 
+                    },
+                    { 
+                        title: { en: "Design Execution", zh: "设计执行" }, 
+                        content: {
+                            en: "With the system logic defined: Each zone was designed as part of a continuous experience. Materials transitioned according to spatial hierarchy. Visual anchors were placed to support wayfinding. Cultural elements were embedded into form and proportion rather than applied decoration. Local design decisions were evaluated based on their impact on the overall system.",
+                            zh: "随着系统逻辑的定义：每个区域都被设计为连续体验的一部分；材质根据空间层级进行转换；设置视觉锚点以支持寻路；文化元素嵌入形式和比例中，而非外加装饰；局部设计决策基于其对整体系统的影响进行评估。"
+                        },
+                        imageSlot: { en: "public/images/case-5-5.webp", zh: "public/images/case-5-5.webp" } 
+                    },
+                    { 
+                        title: { en: "Outcome", zh: "成果" }, 
+                        content: {
+                            en: "The completed space delivered: A coherent spatial narrative across multiple levels. Clear circulation without relying on explicit instruction. Functional clarity for daily operation. A culturally grounded experience that remained contemporary and restrained. The project demonstrated how structure and logic can create emotional impact without sacrificing usability. Different medium. Same design discipline.",
+                            zh: "完工后的空间交付了：跨越多个楼层的连贯空间叙事；无需明确指令的清晰动线；日常运营的功能清晰度；既具有文化底蕴又保持当代和克制的体验。该项目展示了结构和逻辑如何在不牺牲可用性的情况下创造情感冲击。不同的媒介，相同的设计学科。"
+                        },
+                        imageGrid: [{ en: "public/images/case-5-6.webp", zh: "public/images/case-5-6.webp" }, { en: "public/images/case-5-7.webp", zh: "public/images/case-5-7.webp" }] 
+                    }
                 ]
               },
               {
@@ -209,9 +397,30 @@
                 description: { en: "An experiential interior project centered on human memory and emotional resonance.", zh: "一个以人类记忆和情感共鸣为中心的体验式室内项目。" },
                 color: "from-orange-900/40",
                 details: [
-                    { title: { en: "Project Context", zh: "项目背景" }, content: { en: "IN THOSE YEARS is an interior design project centered on human memory...", zh: "《那些年》是一个以人类记忆和情感体验为中心的室内设计项目..." }, imageSlot: { en: "public/images/case-6-2.webp", zh: "public/images/case-6-2.webp" } },
-                    { title: { en: "Design Execution", zh: "设计执行" }, content: { en: "With the experiential framework in place: Materials were selected...", zh: "随着体验框架的建立：选择了具有触感和视觉温暖的材质..." }, imageSlot: { en: "public/images/case-6-3.webp", zh: "public/images/case-6-3.webp" } },
-                    { title: { en: "Outcome", zh: "成果" }, content: { en: "The completed space offers: A calm, introspective environment...", zh: "完工后的空间提供了：一个平静、内省的环境..." }, imageGrid: [{ en: "public/images/case-6-4.webp", zh: "public/images/case-6-4.webp" }, { en: "public/images/case-6-5.webp", zh: "public/images/case-6-5.webp" }] }
+                    { 
+                        title: { en: "Project Context", zh: "项目背景" }, 
+                        content: {
+                            en: "IN THOSE YEARS is an interior design project centered on human memory and emotional experience. Unlike system-heavy or function-driven projects, this work focuses on how spatial atmosphere, material, and sequence can evoke a sense of time, familiarity, and quiet reflection. The project explores how space can support emotional presence—not through explicit storytelling, but through carefully controlled sensory cues.",
+                            zh: "《那些年》是一个以人类记忆和情感体验为中心的室内设计项目。不同于侧重系统或功能驱动的项目，该作品关注空间氛围、材质和序列如何唤起时间感、熟悉感和静谧的思考。项目探索了空间如何支持情感存在——不是通过明确的故事讲述，而是通过精心控制的感官线索。"
+                        },
+                        imageSlot: { en: "public/images/case-6-2.webp", zh: "public/images/case-6-2.webp" } 
+                    },
+                    { 
+                        title: { en: "Design Execution", zh: "设计执行" }, 
+                        content: {
+                            en: "With the experiential framework in place:\n• Materials were selected for tactile and visual warmth\n• Color and texture shifts were subtle and intentional\n• Furniture and spatial elements supported stillness rather than activity\n• Details were designed to be noticed over time, not immediately\n\nThe design resists instant impact, favoring quiet accumulation of experience.",
+                            zh: "随着体验框架的建立：\n• 选择了具有触感和视觉温暖的材质\n• 颜色和纹理的转变微妙且有意为之\n• 家具和空间元素支持静止而非活动\n• 细节设计为随着时间推移被注意，而非立即显现\n\n设计抵制即时的视觉冲击，偏向于体验的静谧积累。"
+                        },
+                        imageSlot: { en: "public/images/case-6-3.webp", zh: "public/images/case-6-3.webp" } 
+                    },
+                    { 
+                        title: { en: "Outcome", zh: "成果" }, 
+                        content: {
+                            en: "The completed space offers:\n• A calm, introspective environment\n• Emotional resonance without explicit narrative\n• A sense of familiarity that feels personal rather than designed\n\nUsers are not guided through instructions, but through atmosphere, proportion, and rhythm.",
+                            zh: "完工后的空间提供了：\n• 一个平静、内省的环境\n• 无需明确叙事的情感共鸣\n• 一种感觉私人而非设计出来的熟悉感\n\n用户不是通过指令被引导，而是通过氛围、比例和韵律。"
+                        },
+                        imageGrid: [{ en: "public/images/case-6-4.webp", zh: "public/images/case-6-4.webp" }, { en: "public/images/case-6-5.webp", zh: "public/images/case-6-5.webp" }] 
+                    }
                 ]
               }
             ]
@@ -228,7 +437,6 @@
                 role: { en: "3D Specialist", zh: "3D专家" },
                 heroImage: "public/images/arch/9.webp",
                 layout: 'gallery',
-                // Using Manual Image List for Gallery
                 images: [
                     "public/images/arch/1.webp", "public/images/arch/2.webp", "public/images/arch/3.webp", "public/images/arch/4.webp",
                     "public/images/arch/5.webp", "public/images/arch/6.webp", "public/images/arch/7.webp", "public/images/arch/8.webp",
@@ -561,7 +769,7 @@
         };
 
         const MasonryGallery = ({ images, onImageClick }) => {
-            if (!images || images.length === 0) return null;
+            if (!images || !Array.isArray(images) || images.length === 0) return null;
             return (
                 <div className="columns-1 md:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4 p-4">
                     {images.map((img, idx) => (
@@ -586,8 +794,7 @@
           const galleryImages = useMemo(() => {
               const imgs = [];
               
-              // 🟢 FIX: Handle manual images array (for ID 4,5,6)
-              if (project.images) {
+              if (project.images && Array.isArray(project.images)) {
                   return project.images.map(path => ({ type: 'img', src: path, label: '' }));
               }
               
@@ -610,13 +817,13 @@
               if (project.details) {
                   project.details.forEach(section => {
                       if (section.imageSlot) {
-                          const isUrl = section.imageSlot[lang].startsWith('http') || section.imageSlot[lang].startsWith('images/'); 
+                          const isUrl = section.imageSlot[lang].startsWith('http') || section.imageSlot[lang].includes('images/'); 
                           imgs.push({ type: isUrl ? 'img' : 'placeholder', src: isUrl ? section.imageSlot[lang] : undefined, label: isUrl ? "Detail Image" : section.imageSlot[lang] });
                       }
                       if (section.imageGrid) {
                           section.imageGrid.forEach(imgItem => {
                               const label = imgItem[lang];
-                              const isUrl = label.startsWith('http') || label.startsWith('images/');
+                              const isUrl = label.startsWith('http') || label.includes('images/');
                               imgs.push({ type: isUrl ? 'img' : 'placeholder', src: isUrl ? label : undefined, label: isUrl ? "Gallery Image" : label });
                           });
                       }
