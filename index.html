@@ -76,7 +76,6 @@
           { school: { en: "Hubei University of Technology", zh: "湖北工业大学" }, degree: { en: "Exhibition Design, Bachelor of Arts", zh: "会展设计学士" }, period: "Sep 2007 - Jun 2011", gpa: "GPA: 3.4/4.0" }
         ];
 
-        /* --- ⚠️ 已恢复全部原始文案 --- */
         const projectGroups = [
           {
             key: 'digital',
@@ -251,7 +250,7 @@
                 duration: { en: "~2 Months", zh: "~2 个月" },
                 heroImage: "public/images/case-3-1.webp",
                 focus: { en: ["· AI-assisted Discovery", "· Workflow Acceleration"], zh: ["· AI 辅助发现", "· 工作流加速"] },
-                description: { en: "Accelerating event discovery in high-volume camera systems to reduce time and effort while preserving user trust.", zh: "加速海量摄像机系统中的事件发现，在保持用户信任的同时减少时间和精力消耗。" },
+                description: { en: "Accelerating event discovery in high-volume camera systems.", zh: "加速海量摄像机系统中的事件发现。" },
                 color: "from-purple-900/40", 
                 details: [
                     { 
@@ -886,23 +885,39 @@
                                                             <div className="w-full aspect-[16/9]">{section.chartData.type === 'bar' ? (<BlueprintBarChart title={section.chartData.title[lang]} data={section.chartData.data} />) : (<BlueprintTrendChart title={section.chartData.title[lang]} label1={section.chartData.labels.start} label2={section.chartData.labels.end} />)}</div>
                                                         ) : section.imageGrid ? ( 
                                                              <div className="grid grid-cols-1 gap-8 w-full"> 
-                                                                {section.imageGrid.map((img, i) => { renderImageIndex++; const thisImageIndex = renderImageIndex; return (
+                                                                {section.imageGrid.map((img, i) => { renderImageIndex++; const thisImageIndex = renderImageIndex; 
+                                                                    const imgSrc = img[lang];
+                                                                    const isImage = imgSrc.includes('images/');
+                                                                    return (
                                                                      <div key={i} className="w-full aspect-video p-8 border border-white/10 bg-white/5 backdrop-blur-sm rounded-lg flex flex-col items-center justify-center text-center gap-4 relative overflow-hidden group hover:border-white/20 transition-all hover:bg-white/10 cursor-zoom-in" onClick={() => openLightbox(thisImageIndex)}>
-                                                                         <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
-                                                                         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 translate-y-[-100%] group-hover:translate-y-[100%] transition-all duration-1000 ease-in-out pointer-events-none"></div>
-                                                                         <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform z-10"><ImageIcon className="w-8 h-8 text-white/60" /></div>
-                                                                         <div className="z-10 px-4 py-2 bg-black/40 border border-white/10 rounded"><span className="text-xs font-mono text-white/70 uppercase tracking-widest">{img[lang]}</span></div>
-                                                                         <div className="absolute top-4 right-4 bg-black/50 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><Maximize2 className="w-5 h-5 text-white" /></div>
+                                                                         {isImage ? (
+                                                                             <img src={imgSrc} className="w-full h-full object-cover absolute inset-0" alt="Detail Grid" />
+                                                                         ) : (
+                                                                             <>
+                                                                                <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
+                                                                                <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform z-10"><ImageIcon className="w-8 h-8 text-white/60" /></div>
+                                                                                <div className="z-10 px-4 py-2 bg-black/40 border border-white/10 rounded"><span className="text-xs font-mono text-white/70 uppercase tracking-widest">{imgSrc}</span></div>
+                                                                             </>
+                                                                         )}
+                                                                         <div className="absolute top-4 right-4 bg-black/50 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20"><Maximize2 className="w-5 h-5 text-white" /></div>
                                                                      </div>
                                                                  )})}
                                                              </div>
-                                                        ) : section.imageSlot && (() => { renderImageIndex++; const thisImageIndex = renderImageIndex; return (
+                                                        ) : section.imageSlot && (() => { renderImageIndex++; const thisImageIndex = renderImageIndex; 
+                                                                const imgSrc = section.imageSlot[lang];
+                                                                const isImage = imgSrc.includes('images/');
+                                                                return (
                                                                 <div className="w-full aspect-[16/9] p-8 border border-white/10 bg-white/5 backdrop-blur-sm rounded-lg flex flex-col items-center justify-center text-center gap-4 relative overflow-hidden group hover:border-white/20 transition-all hover:bg-white/10 cursor-zoom-in" onClick={() => openLightbox(thisImageIndex)}>
-                                                                    <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
-                                                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-white/5 to-transparent opacity-0 group-hover:opacity-100 translate-y-[-100%] group-hover:translate-y-[100%] transition-all duration-1000 ease-in-out pointer-events-none"></div>
-                                                                    <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform z-10"><ImageIcon className="w-8 h-8 text-white/60" /></div>
-                                                                    <div className="z-10 px-4 py-2 bg-black/40 border border-white/10 rounded"><span className="text-xs font-mono text-white/70 uppercase tracking-widest">{section.imageSlot[lang]}</span></div>
-                                                                    <div className="absolute top-4 right-4 bg-black/50 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"><Maximize2 className="w-5 h-5 text-white" /></div>
+                                                                    {isImage ? (
+                                                                        <img src={imgSrc} className="w-full h-full object-cover absolute inset-0" alt="Detail Slot" />
+                                                                    ) : (
+                                                                        <>
+                                                                            <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,0.2) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.2) 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
+                                                                            <div className="w-20 h-20 rounded-full bg-white/5 border border-white/10 flex items-center justify-center mb-2 group-hover:scale-110 transition-transform z-10"><ImageIcon className="w-8 h-8 text-white/60" /></div>
+                                                                            <div className="z-10 px-4 py-2 bg-black/40 border border-white/10 rounded"><span className="text-xs font-mono text-white/70 uppercase tracking-widest">{imgSrc}</span></div>
+                                                                        </>
+                                                                    )}
+                                                                    <div className="absolute top-4 right-4 bg-black/50 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity z-20"><Maximize2 className="w-5 h-5 text-white" /></div>
                                                                 </div>
                                                         )})()}
                                                     </div>
