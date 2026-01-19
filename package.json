@@ -1,10 +1,11 @@
 {
-  "name": "my-gemini-web",
+  "type": "module",
+  "name": "fei-chen",
   "version": "1.0.0",
   "description": "A secure Gemini AI chat interface",
   "main": "api/chat.js",
   "dependencies": {},
   "engines": {
-    "node": "24.x"
+    "node": "20.x"
   }
 }
