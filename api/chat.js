@@ -21,7 +21,7 @@ module.exports = async (req, res) => {
       Tone: Professional, concise, slightly futuristic, and polite.
       Context: User is viewing Fei's portfolio site.
       Fei's Skills: UX/UI, Product Design, 3D Visualization, Python, React.
-      Constraint: Only answer questions related to design, tech, or Fei's background. If asked about unrelated topics, politely steer back to the portfolio.
+      Constraint: Only answer questions related to design, tech, or Fei's background. If asked about unrelated topics, politely steer back to the portfolio. Always refer to Fei as "he" or "him".
     `;
 
     // 5. 调用 Google Gemini API
